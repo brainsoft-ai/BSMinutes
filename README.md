@@ -1,5 +1,5 @@
-# demo_separate_server
-BSMinuete 데모를 위한 서버
+# demo_minute_server
+BSMinute 데모를 위한 서버
 
 
 ## environment setup
