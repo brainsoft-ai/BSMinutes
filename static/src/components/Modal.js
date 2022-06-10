@@ -268,11 +268,11 @@ export default class Modal {
         formData.append('body', temp);
         formData.append('audio', this.audioBlob, 'recording.'+ext);
         
-        //await fetch('https://localhost/record', {
-        //  method: 'POST',
-        //  body: formData,
-        //})
-        //.then((response) => response.json())
+        await fetch('http://localhost:5000/upload', {
+         method: 'POST',
+         body: formData,
+        })
+        .then((response) => response.json())
         $modalAudio.classList.add("hidden");
         const $filter = document.querySelector(".modal-content__ok");
         if (($filter && !$filter.matches(".nope")) || !$filter) {

@@ -3,16 +3,22 @@ from os.path import isdir
 from flask import Flask, flash, request, redirect, url_for, jsonify, render_template
 from werkzeug.utils import secure_filename
 import json
-import torchaudio
+import torchaudio, librosa
+from djs.djs import DJS
+from djs.djt import DJT
 
+RESULT_FOLDER = './results/'
 UPLOAD_FOLDER = './downloads/'
-ALLOWED_EXTENSIONS = {'mp3', 'wav'}
+ALLOWED_EXTENSIONS = {'mp3', 'wav', 'webm'}
 uploaded_data = [] #(id, timestamp, filepath)
 processed_data = {}
 data_semaphore = 0
 sessionid = 0
 
-app = Flask(__name__)
+app = Flask(__name__,
+            static_url_path='', 
+            static_folder='static',
+            template_folder='templates')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -31,59 +37,97 @@ def sync_audio(wav1, time1, wav2, time2, sr):
 
     return new_wav1, new_wav2
 
-def find_max(file1, file2):
-    max_specs =  []
-    for spec in specs:
-        sin_spec, cos_spec = spec
-        sin_spec_l, sin_spec_r = sin_spec[0], sin_spec[1]
-        cos_spec_l, cos_spec_r = cos_spec[0], cos_spec[1]
-        amp_l = (sin_spec_l ** 2 + cos_spec_l ** 2) ** 0.5
-        amp_r = (sin_spec_r ** 2 + cos_spec_r ** 2) ** 0.5
-        
-        l_index = (amp_l >= amp_r)
-        r_index = (amp_l <= amp_r)
+def mix_mono2stereo(wav_data1, ratio1_l, ratio1_r, wav_data2, ratio2_l, ratio2_r):
+    wav_data_l = wav_data1 * ratio1_l + wav_data2 * ratio2_l
+    wav_data_r = wav_data1 * ratio1_r + wav_data2 * ratio2_r
+    wav_data = torch.stack([wav_data_l, wav_data_r]).transpose(1, 0)
 
-        sin_spec_l, cos_spec_l = sin_spec_l * l_index, cos_spec_l * l_index
-        sin_spec_r, cos_spec_r = sin_spec_r * r_index, cos_spec_r * r_index
+    return wav_data
 
-        max_specs.append( ((sin_spec_l, cos_spec_l),(sin_spec_r, cos_spec_r)) )
+def mix_mono2stereo_file(file1, ratio1_l, ratio1_r, file2, ratio2_l, ratio2_r):
+    #wav_data1, sr1 = torchaudio.load(file1)
+    wav_data1, sr1 = librosa.load(file1)
+    wav_data1 = wav_data1.transpose(0,1).squeeze(1)
+    #wav_data2, sr2 = torchaudio.load(file2)
+    wav_data2, sr2 = librosa.load(file2)
+    wav_data2 = wav_data2.transpose(0,1).squeeze(1)
+    assert(sr1==sr2)
 
+    #check mono
+    assert(len(wav_data1) == 1)
 
-    for idx, name in enumerate(wav_paths):
-        l_spec, r_spec = max_specs[idx]
-        sin_spec_l, cos_spec_l = l_spec
-        sin_spec_r, cos_spec_r = r_spec
+    wav_data = mix_mono2stereo(wav_data1, ratio1_l, ratio1_r, wav_data2, ratio2_l, ratio2_r)
 
-        wav_path_name, ext = name.rsplit(".", maxsplit=1)
+    return sr1, wav_data
 
-        wav = generate_inverse_wav(green_djt, djt_config, sin_spec_l, cos_spec_l, dtype_str="float32")
-        wavfile.write(f"{wav_path_name}_l.wav", djt_config["sr"], wav)
+def find_max(spec):
+    sin_spec = spec.get_sin_spectrogram()
+    cos_spec = spec.get_cos_spectrogram()
+    sin_spec_l, sin_spec_r = sin_spec[0], sin_spec[1]
+    cos_spec_l, cos_spec_r = cos_spec[0], cos_spec[1]
+    amp_l = (sin_spec_l ** 2 + cos_spec_l ** 2) ** 0.5
+    amp_r = (sin_spec_r ** 2 + cos_spec_r ** 2) ** 0.5
+    
+    l_index = (amp_l >= amp_r)
+    r_index = (amp_l <= amp_r)
 
-        wav = generate_inverse_wav(green_djt, djt_config, sin_spec_r, cos_spec_r, dtype_str="float32")
-        wavfile.write(f"{wav_path_name}_r.wav", djt_config["sr"], wav)
+    sin_spec_l, cos_spec_l = sin_spec_l * l_index, cos_spec_l * l_index
+    spec_l = DJS(sin_spec_l, cos_spec_l, spec.get_config())
+    sin_spec_r, cos_spec_r = sin_spec_r * r_index, cos_spec_r * r_index
+    spec_r = DJS(sin_spec_r, cos_spec_r, spec.get_config())
 
-    return file1, file2
+    return spec_l, spec_r
 
 def get_stt(file):
     pass
 
-def process_data():
+def get_session_data(sessionid):
+    session_dir = f"{RESULT_FOLDER}{sessionid:05d}"
+    if not isdir(session_dir):
+        return "invalid session id"
+    else:
+        #remove existing files
+        pass
+
+def process_data(sessionid):
     user1 = uploaded_data[0][0]
     time1 = uploaded_data[0][1]
-    wav1, sr1 = torchaudio.load(uploaded_data[0][2])
+    file1 = uploaded_data[0][2]
+    #wav1, sr1 = torchaudio.load(f"{UPLOAD_FOLDER}{file1}")
+    wav1, sr1 = librosa.load(f"{UPLOAD_FOLDER}{file1}")
+    ch1 = len(wav1)
+
     user2 = uploaded_data[1][0]
     time2 = uploaded_data[1][1]
-    wav2, sr2 = torchaudio.load(uploaded_data[1][2])
+    file2 = uploaded_data[1][2]
+    wav2, sr2 = torchaudio.load(f"{UPLOAD_FOLDER}{file2}")
+    ch2 = len(wav2)
 
-    assert(sr1 == sr2)
+    assert(sr1 == sr2 and ch1 == ch2)
     sr = sr1
+    ch = ch1
 
     wav1, wav2 = sync_audio(wav1, time1, wav2, time2, sr)
+    wav = mix_mono2stereo(wav1, 1.0, 0.0, wav2, 0.0, 1.0)
 
-    file1, file2 = find_max(wav1, wav2)
+    djt = DJT(sample_rate=sr, channels=ch)
+    djs = djt.wav2djs(wav)
+    djs1, djs2 = find_max(djs)
 
-    result1 = get_stt(file1)
-    result2 = get_stt(file2)
+    session_dir = f"{RESULT_FOLDER}{sessionid:05d}"
+    if not isdir(session_dir):
+        os.mkdir(session_dir)
+    else:
+        #remove existing files
+        pass
+
+    new_path1 = f"{session_dir}/{file1}"
+    wav1 = djt.djs2wav(djs1, save=True, wav_path=new_path1)
+    new_path2 = f"{session_dir}/{file2}"
+    wav2 = djt.djs2wav(djs2, save=True, wav_path=new_path2)
+
+    result1 = get_stt(new_path_1)
+    result2 = get_stt(new_path_2)
 
     uploaded_data.clear()
 
@@ -116,23 +160,28 @@ def upload_file():
             return redirect(request.url)
 
         if file and allowed_file(file.filename):
-            filepath = secure_filename(f"{userid}_{timestamp}_{file.filename}")
-            filepath = f"./download/{filepath}"
-            file.save(filepath)
+            filename = secure_filename(f"{timestamp}_{userid}_{file.filename}")
+            filename = filename[:-4]+"mp3"
+            file.save(f"{UPLOAD_FOLDER}{filename}")
+        else:
+            flash('file type not supported')
+
+        global data_semaphore
+        global sessionid
 
         if data_semaphore != 0:
             return jsonify(
-                result="Processing audio files ... "
+                result="Processing audio files ... try again a second later"
             )
 
         data_semaphore = 1
         upload_count = len(uploaded_data)
         if upload_count == 0:
             sessionid += 1
-            uploaded_data.append((userid, timestamp, filepath))
+            uploaded_data.append((userid, timestamp, filename))
         elif upload_count == 1:
-            uploaded_data.append((userid, timestamp, filepath))
-            process_data()
+            uploaded_data.append((userid, timestamp, filename))
+            process_data(sessionid)
         data_semaphore = 0
 
     return jsonify(
@@ -151,4 +200,7 @@ if __name__ == "__main__":
     if not isdir(UPLOAD_FOLDER):
         os.mkdir(UPLOAD_FOLDER)
 
-    app.run(host="127.0.0.1", port=5000, debug=False, processes=2)
+    if not isdir(RESULT_FOLDER):
+        os.mkdir(RESULT_FOLDER)
+
+    app.run(host="127.0.0.1", port=5000, debug=True, threaded=True)
