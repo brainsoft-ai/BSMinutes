@@ -17,7 +17,6 @@ export default class CardComponent {
       pinnedComplete: null,
     };
     this.cards.todo = this.initTodoCards.bind(this)();
-    this.cards.complete = this.initCompleteCards.bind(this)();
 
     this.activeSection = "todos";
     this.profileComponent = null;
@@ -174,46 +173,6 @@ export default class CardComponent {
     return todo;
   }
 
-  initCompleteCards() {
-    let complete = [];
-    const completeCards = CardStorage.getAllCardFromComplete();
-
-    completeCards.forEach((completeCard) => {
-      const $cardElement = document.createElement("div");
-      $cardElement.className = completeCard.pinned ? "card pinned" : "card";
-      $cardElement.id = completeCard.id;
-      $cardElement.innerHTML = completeCard.element;
-
-      const newCard = new Card(
-        {
-          tag: completeCard.tag,
-          countdown: completeCard.countdown,
-          text: completeCard.text,
-          updatedAt: completeCard.updatedAt,
-          createdAt: completeCard.createdAt,
-          cardComponent: this,
-          salt: completeCard.salt,
-          id: completeCard.id,
-          modal: this.modal,
-          pinned: completeCard.pinned,
-        },
-        true
-      );
-
-      const $countdown = newCard.element.querySelector(".card__countdown");
-      $countdown.innerHTML = "Complete";
-      $countdown.classList.add("complete");
-
-      if (completeCard.pinned) {
-        this.cards.pinnedComplete = newCard;
-      } else {
-        complete.push(newCard);
-      }
-    });
-
-    return complete;
-  }
-
   createCardContainer() {
     const $cardContainer = document.createElement("main");
     $cardContainer.className = "card-container loading";
@@ -310,7 +269,7 @@ export default class CardComponent {
           }
           let countdown = $audio.duration;
           const text = $todoInputContainer.querySelector(".todo__input").value;
-
+          
           if (text.length > 14) {
             $todoInputContainer.classList.add("nope");
             $todoInputContainer.querySelector(
@@ -323,6 +282,9 @@ export default class CardComponent {
           } else {
             $todoInputContainer.classList.remove("nope");
           }
+          
+          const sessionid = document.querySelector(".modal-content__text").value;
+          console.log(sessionid);
 
           const newCard = new Card({
             tag: tags,
@@ -331,6 +293,7 @@ export default class CardComponent {
             cardComponent: this,
             modal: this.modal,
             pinned: false,
+            sessionid: sessionid,
           });
 
           this.cards.todo.unshift(newCard);
@@ -442,7 +405,7 @@ export default class CardComponent {
     $searchBar.className = "filter__search-bar";
     $searchBar.type = "text";
     $searchBar.placeholder = LangStorage.isEnglish()
-      ? "Search id"
+      ? "Search"
       : "검색";
     $searchBar.spellcheck = false;
     $searchBar.addEventListener("focusin", () => {
@@ -803,7 +766,7 @@ export default class CardComponent {
     $tagInput.addEventListener("keyup", (e) => {
       let tag = $tagInput.value;
 
-      if (e.keyCode === 13) {
+      if (e.key === 13) {
         tag = tag.trim().replace(" ", "");
 
         if (checkRemainTagOnCard(tag) || !isValidTag(tag)) {
@@ -836,7 +799,7 @@ export default class CardComponent {
     $tagInput.addEventListener("keydown", (e) => {
       let tag = $tagInput.value;
 
-      if (e.keyCode === 8 && tag.length === 0) {
+      if (e.key === 8 && tag.length === 0) {
         let allTags = $tagInnerContainer.querySelectorAll(".tag");
         allTags = [].slice.call(allTags);
 
@@ -891,8 +854,8 @@ export default class CardComponent {
     $toDoInput.type = "text";
     $toDoInput.spellcheck = false;
     $toDoInput.placeholder = LangStorage.isEnglish()
-      ? "Leave a note"
-      : "메모를 작성해주세요!";
+      ? "Title"
+      : "제목을 입력해주세요";
     $toDoInput.addEventListener("focusin", () => {
       $removeButton.classList.add("active");
     });
@@ -914,8 +877,8 @@ export default class CardComponent {
       $lengthContainer.textContent = `${$toDoInput.value.length} / ${textLimit}`;
     });
     $toDoInput.addEventListener("keyup", (e) => {
-      if (e.keyCode === 13) {
-        const $submitButton = document.querySelector(".modal-content__record");
+      if (e.key === 13) {
+        const $submitButton = document.querySelector(".modal-content__ok");
         $submitButton.click();
       }
     });

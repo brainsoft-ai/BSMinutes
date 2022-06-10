@@ -18,9 +18,11 @@ export default class Card {
       id,
       modal,
       pinned,
+      sessionid,
     },
     isComplete = false
   ) {
+    this.sessionid = sessionid;
     this.pinned = pinned;
     this.tag = tag;
     this.countdown = countdown;
@@ -285,8 +287,12 @@ export default class Card {
       const $filterContainer = document.querySelector(".filter-container");
 
       const $resultContainer = document.querySelector(".result-container");
-      $resultContainer.innerHTML =
+      
+      const $resultBack = document.createElement("div");
+      $resultBack.className = "result-back";
+      $resultBack.innerHTML =
         '<i class="fas fa-arrow-left"></i>';
+      $resultContainer.appendChild($resultBack);
       
       function passout(e) {
         e.target.removeEventListener("animationend", passout)
@@ -295,12 +301,21 @@ export default class Card {
         $filterContainer.classList.add("hidden");
         $addCardButton.classList.add("hidden");
         $addCardButton.classList.remove("animation");
-        let card_text = $card.querySelector(".card__text");
-        card_text.classList.add("detail");
-        $resultContainer.appendChild(card_text);
-        $resultContainer.appendChild($card.querySelector(".card__countdown"));
+        const $card_text = $card.querySelector(".card__text");
+        $card_text.classList.add("detail");
+        
+        const $modalAudio = document.createElement("audio");
+        $modalAudio.className = "modal-content__audio";
+        $modalAudio.controls = true;
+        const $resultText = document.createElement("div");
+        $resultText.className = "result-text";
+
+        $resultContainer.appendChild($card_text);
+        //$resultContainer.appendChild($card.querySelector(".card__countdown"));
         $resultContainer.appendChild($card.querySelector(".card__date-container"));
         $resultContainer.appendChild($card.querySelector(".card__tag-container"));
+        $resultContainer.appendChild($modalAudio);
+        $resultContainer.appendChild($resultText);
         
         $resultContainer.classList.add("animation");
         function passin(e) {
@@ -572,6 +587,10 @@ export default class Card {
         $cardTagContainer.appendChild($tag);
       });
     }
+    
+    const $cardSessionContainer = document.createElement("div");
+    $cardSessionContainer.className = "card__session-container";
+    $cardSessionContainer.textContent = this.sessionid;
 
     const $cardDateContainer = document.createElement("div");
     $cardDateContainer.className = "card__date-container";
@@ -854,6 +873,7 @@ export default class Card {
     $card.appendChild($cardPinText);
     $card.appendChild($cardText);
     $card.appendChild($cardTagContainer);
+    $card.appendChild($cardSessionContainer);
     $card.appendChild($cardDateContainer);
     $card.appendChild($cardMenuContainer);
 

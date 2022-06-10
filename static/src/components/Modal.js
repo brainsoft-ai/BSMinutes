@@ -1,11 +1,11 @@
-import { LangStorage } from "../utils/CustomStorage.js";
+import { UserStorage, LangStorage } from "../utils/CustomStorage.js";
 
 export default class Modal {
   constructor({ $target }) {
     this.$target = $target;
     this.$modalContainer = this.createModal();
     this.data = null;
-    this.close = this.closeModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
     this.record = this.record.bind(this);
     this.ok = this.ok.bind(this);
     
@@ -22,7 +22,7 @@ export default class Modal {
 
     const $modalBackground = document.createElement("div");
     $modalBackground.className = "modal__background";
-    $modalBackground.addEventListener("click", this.close);
+    $modalBackground.addEventListener("click", this.closeModal);
 
     const $modalContent = document.createElement("div");
     $modalContent.className = "modal__content hidden";
@@ -30,7 +30,7 @@ export default class Modal {
     const $modalCloseBtn = document.createElement("button");
     $modalCloseBtn.className = "modal-content__close";
     $modalCloseBtn.innerHTML = '<i class="fas fa-times"></i>';
-    $modalCloseBtn.addEventListener("click", this.close);
+    $modalCloseBtn.addEventListener("click", this.closeModal);
 
     const $modalTitle = document.createElement("span");
     $modalTitle.className = "modal-content__title";
@@ -175,9 +175,15 @@ export default class Modal {
   }
 
   closeModal() {
-    this.$modalContainer.classList.add("hidden");
+    console.log(this);
+    
+    const $modalContainer = document.querySelector(
+      ".modal-container"
+    );
 
-    const $modalContent = this.$modalContainer.querySelector(".modal__content");
+    $modalContainer.classList.add("hidden");
+
+    const $modalContent = $modalContainer.querySelector(".modal__content");
     $modalContent.classList.add("hidden");
 
     $modalContent.querySelector(".modal-content__title").textContent = "";
@@ -187,15 +193,22 @@ export default class Modal {
     $modalContent.querySelector(".modal-content__text").classList.add("hidden");
     $modalContent.querySelector(".modal-content__html").classList.add("hidden");
 
-    const $modalRec = this.$modalContainer.querySelector(
+    const $modalAudio = $modalContainer.querySelector(
+      ".modal-content__audio"
+    );
+
+    const $modalRec = $modalContainer.querySelector(
       ".modal-content__rec"
     );
 
-    const $modalOkBtn = this.$modalContainer.querySelector(
+    const $modalOkBtn = $modalContainer.querySelector(
       ".modal-content__ok"
     );
     
+    $modalAudio.classList.add("hidden");
     $modalRec.removeEventListener("click", this.record);
+    $modalOkBtn.removeEventListener("click", this.ok);
+    
     /*
     const $RecordBtn = $modalContent.querySelector(".modal-content__rec");
     $RecordBtn.outerHTML = $RecordBtn.outerHTML;
@@ -257,31 +270,43 @@ export default class Modal {
       this.mediaRecorder.stop();
       $modalOkBtn.classList.remove("nope"); 
       $modalOkBtn.addEventListener("click", async() => {
-        const formData = new FormData();
+        const text = document.querySelector(".todo__input").value;
+        if (text.length <= 14) {
+            
+          const formData = new FormData();
 
-        const ext = ["audio/webm", "audio/ogg", "audio/mp4"]
-        .filter(MediaRecorder.isTypeSupported)[0].slice(6);
+          const ext = ["audio/webm", "audio/ogg", "audio/mp4"]
+          .filter(MediaRecorder.isTypeSupported)[0].slice(6);
 
-        const temp = JSON.stringify({
-          id: 'id',
-          timestamp: 'timestamp',});
-        formData.append('body', temp);
-        formData.append('audio', this.audioBlob, 'recording.'+ext);
-        
-        await fetch('http://localhost:5000/upload', {
-         method: 'POST',
-         body: formData,
-        })
-        .then((response) => response.json())
-        $modalAudio.classList.add("hidden");
-        const $filter = document.querySelector(".modal-content__ok");
-        if (($filter && !$filter.matches(".nope")) || !$filter) {
-          this.onContinue();
-          this.closeModal();
-          $filter.classList.add("nope");
-          $modalRecBtn.classList.remove("focused");
+          const temp = JSON.stringify({
+            id: UserStorage.getUserData(),
+            timestamp: Date.now()});
+          formData.append('body', temp);
+          formData.append('audio', this.audioBlob, 'recording.'+ext);
+          
+          await fetch('http://localhost:5000/upload', {
+            method: 'POST',
+            body: formData,
+          })
+          .then((response) => response.json())
+          .then((result) => {
+            const $session = document.querySelector(".modal-content__text");
+            $session.value = result.sessionid;
+          });
+
+          $modalAudio.classList.add("hidden");
+          const $filter = document.querySelector(".modal-content__ok");
+          
+          if (($filter && !$filter.matches(".nope")) || !$filter) {
+            
+            this.onContinue();
+            this.closeModal();
+            $filter.classList.add("nope");
+            $modalRecBtn.classList.remove("focused");
+          }
         }
       });
+
     }
     else{
       $modalRecBtn.classList.add("focused");

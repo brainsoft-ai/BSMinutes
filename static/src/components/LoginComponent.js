@@ -70,7 +70,7 @@ export default class LoginComponent {
         });
 
         loginInput.addEventListener("keyup", (e) => {
-          if (e.keyCode === 13 && !this.isLoading) {
+          if (e.key === 13 && !this.isLoading) {
             this.renderCheckUser();
           }
         });

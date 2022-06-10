@@ -1,7 +1,6 @@
 * {
   font-family: "Open Sans", "NanumSquare", sans-serif;
   box-sizing: border-box;
-  user-drag: none;
   user-select: none;
   -moz-user-select: none;
   -webkit-user-drag: none;
@@ -518,6 +517,7 @@ body {
   justify-content: center;
   align-items: center;
   text-align: center;
+  align-self: center;
 }
 
 
@@ -660,7 +660,13 @@ body {
   transition: 0.55s cubic-bezier(0.22, 0.68, 0, 1);
 }
 
+.card__session-container {
+  display: none;
+}
+
 .result-container {
+  display: flex;
+  flex-direction: column;
   color: white;
   width: 100%;
   height: calc(100% - 38px);
@@ -1760,6 +1766,15 @@ input[type="number"]::-webkit-outer-spin-button {
   .modal__content {
     width: calc(100% - 30px);
   }
+  
+  .card-container{
+    margin-top: 50px;
+  }
+
+  .add-card-button.hide {
+    top: 10px;
+    transition: 0.55s cubic-bezier(0.22, 0.68, 0, 1);
+  }
 
   .profile-container {
     padding: 0 5px;
@@ -1800,54 +1815,6 @@ input[type="number"]::-webkit-outer-spin-button {
     width: 40px;
     height: 40px;
     font-size: 20px;
-  }
-
-  .progress-container {
-    width: 70px;
-    height: 70px;
-  }
-
-  .progress-container:hover {
-    box-shadow: 0 0 21px rgba(0, 0, 0, 0.3);
-  }
-
-  .progress-container .progress__inner {
-    width: 56px;
-    height: 56px;
-    margin: -28px 0 0 -28px;
-  }
-
-  .progress-container .progress__inner-container span {
-    width: 56px;
-    height: 56px;
-    font-size: 14px;
-  }
-
-  .progress__circle .progress__bar {
-    clip: rect(0px, 70px, 70px, 35px);
-    box-shadow: 0 0 7px rgba(0, 0, 0, 0.5) inset;
-  }
-
-  .progress__circle .progress__bar .progress__bar-inner {
-    clip: rect(0px, 35px, 70px, 0px);
-    box-shadow: 0 0 7px #4158d0 inset;
-  }
-
-  .progress__circle .progress__dot {
-    z-index: 2;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 50%;
-    height: 7px;
-    margin-top: -3.5px;
-    transform: rotate(-90deg);
-    transform-origin: 0% 50%;
-  }
-
-  .progress__circle .progress__dot span {
-    width: 7px;
-    height: 7px;
   }
 
   .section-button__todo {
