@@ -284,26 +284,25 @@ export default class Modal {
           formData.append('body', temp);
           formData.append('audio', this.audioBlob, 'recording.'+ext);
           
-          await fetch('http://localhost:5000/upload', {
+          await fetch('http://127.0.0.1:5000/upload', {
             method: 'POST',
             body: formData,
           })
           .then((response) => response.json())
           .then((result) => {
-            const $session = document.querySelector(".modal-content__text");
+            const $session = document.querySelector(".session-container");
             $session.textContent = result.sessionid;
-          });
 
-          $modalAudio.classList.add("hidden");
-          const $filter = document.querySelector(".modal-content__ok");
-          
-          if (($filter && !$filter.matches(".nope")) || !$filter) {
+            $modalAudio.classList.add("hidden");
+            const $filter = document.querySelector(".modal-content__ok");
             
-            this.onContinue();
-            this.closeModal();
-            $filter.classList.add("nope");
-            $modalRecBtn.classList.remove("focused");
-          }
+            if (($filter && !$filter.matches(".nope")) || !$filter) { 
+              this.onContinue();
+              this.closeModal();
+              $filter.classList.add("nope");
+              $modalRecBtn.classList.remove("focused");
+            }
+          });
         }
       });
 
