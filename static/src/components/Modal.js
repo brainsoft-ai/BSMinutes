@@ -291,7 +291,7 @@ export default class Modal {
           .then((response) => response.json())
           .then((result) => {
             const $session = document.querySelector(".modal-content__text");
-            $session.value = result.sessionid;
+            $session.textContent = result.sessionid;
           });
 
           $modalAudio.classList.add("hidden");

@@ -283,7 +283,7 @@ export default class CardComponent {
             $todoInputContainer.classList.remove("nope");
           }
           
-          const sessionid = document.querySelector(".modal-content__text").value;
+          const sessionid = document.querySelector(".modal-content__text").textContent;
           console.log(sessionid);
 
           const newCard = new Card({
