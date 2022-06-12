@@ -78,8 +78,33 @@ def find_max(spec):
 
     return spec_l, spec_r
 
-def get_stt(file):
-    pass
+def naver_transcribe_file(pcm_file, lang):
+    if lang == 'ko': lang = 'Kor'
+    elif lang == 'en': lang = 'Eng'
+    else: raise "wrong"
+    # lang =  [Kor, Jpn, Eng, Chn]
+    clientID = "yc4p7fth3k"
+    clientSecret = "cith95M3hmwkIi3j9Oh2ZCFkPwnxDSJNd5dCDbDi"
+    naver_csr_url = url = "https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=" + lang
+    headers = {
+        "X-NCP-APIGW-API-KEY-ID": clientID,
+        "X-NCP-APIGW-API-KEY": clientSecret,
+        "Content-Type": "application/octet-stream",
+    }
+    data = open(pcm_file, 'rb')
+    response = requests.post(url, data=data, headers=headers)
+    rescode = response.status_code
+    if(rescode == 200):
+        return json.loads(response.text)['text']
+    else:
+        return "Error : " + response.text
+
+def get_stt(file, lang, stt_engine='naver'):
+    if stt_engine.lower() == 'naver':
+        return naver_transcribe_file(file, lang)
+    else:
+        return "Error"
+
 
 def get_session_data(sessionid):
     session_dir = f"{RESULT_FOLDER}{sessionid:05d}"
