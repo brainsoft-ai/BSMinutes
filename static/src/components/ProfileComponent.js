@@ -22,6 +22,9 @@ export default class ProfileComponent {
       profileContainer.classList.add("active");
     });
 
+    const sessionContainer = document.createElement("div");
+    sessionContainer.className = "session-container";
+
     const $profileToggleContainer = document.createElement("div");
     $profileToggleContainer.className = "profile-toggle-container";
     profileContainer.addEventListener("animationend", () => {
@@ -86,6 +89,7 @@ export default class ProfileComponent {
     this.$buttonContainer = this.createButtonContainer();
     this.$hashButtonContainer = this.createHashButtonContainer();
 
+    profileContainer.appendChild(sessionContainer);
     profileContainer.appendChild(this.$buttonContainer);
     profileContainer.appendChild(this.$hashButtonContainer);
     profileContainer.appendChild(profileText);
