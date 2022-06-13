@@ -1,14 +1,11 @@
 import requests
 import json
 
-clientID = "yc4p7fth3k"
-clientSecret = "cith95M3hmwkIi3j9Oh2ZCFkPwnxDSJNd5dCDbDi"
-
 class ClovaSpeechClient:
     # Clova Speech invoke URL
-    invoke_url = ''
+    invoke_url = 'https://clovaspeech-gw.ncloud.com/external/v1/2913/6cbf3f66659a97a68f0df5c03b55505c7d8048f88fb823e5ff10b61c7e4ccf39'
     # Clova Speech secret key
-    secret = clientSecret
+    secret = '28589f17d223474fb084c46f86963987'
 
     def req_url(self, url, completion, callback=None, userdata=None, forbiddens=None, boostings=None, wordAlignment=True, fullText=True, diarization=None):
         request_body = {
