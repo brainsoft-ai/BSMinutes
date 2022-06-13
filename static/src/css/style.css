@@ -664,6 +664,10 @@ body {
   display: none;
 }
 
+.session-container {
+  display: none;
+}
+
 .result-container {
   display: flex;
   flex-direction: column;

@@ -161,6 +161,7 @@ export default class CardComponent {
         id: todoCard.id,
         modal: this.modal,
         pinned: todoCard.pinned,
+        sessionid: todoCard.sessionid,
       });
 
       if (todoCard.pinned) {
