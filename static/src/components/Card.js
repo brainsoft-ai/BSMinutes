@@ -9,7 +9,7 @@ function convertTime(milliSecond) {
   const hour = String(Math.floor((milliSecond/ (1000 * 60 *60 )) % 24 )).padStart(2, "0"); // 시
   const minutes = String(Math.floor((milliSecond  / (1000 * 60 )) % 60 )).padStart(2, "0"); // 분
   const second = String(Math.floor((milliSecond / 1000 ) % 60)).padStart(2, "0"); // 초
-  const milli = String(Math.floor((milliSecond / 10 ) % 60)).padStart(2, "0"); // 초
+  const milli = String(Math.floor((milliSecond / 10 ) % 60)).padStart(2, "0"); // 0.01초
   return `${hour}:${minutes}:${second}.${milli}`;
 }
 
@@ -303,9 +303,12 @@ export default class Card {
         $filterContainer.classList.add("hidden");
         $addCardButton.classList.add("hidden");
         $addCardButton.classList.remove("animation");
-        const $card_text = $card.querySelector(".card__text");
+        const $card_text = $card.querySelector(".card__text").cloneNode(true);
         $card_text.classList.add("detail");
         
+        const $card_date = $card.querySelector(".card__date-container").cloneNode(true);
+        const $card_tag = $card.querySelector(".card__tag-container").cloneNode(true);
+
         const $modalAudio = document.createElement("audio");
         $modalAudio.className = "modal-content__audio";
         $modalAudio.controls = true;
@@ -376,8 +379,8 @@ export default class Card {
 
         $resultContainer.appendChild($resultBack);
         $resultContainer.appendChild($card_text);
-        $resultContainer.appendChild($card.querySelector(".card__date-container"));
-        $resultContainer.appendChild($card.querySelector(".card__tag-container"));
+        $resultContainer.appendChild($card_date);
+        $resultContainer.appendChild($card_tag);
         $resultContainer.appendChild($modalAudio);
         $resultContainer.appendChild($resultText);
         
