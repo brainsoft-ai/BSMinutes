@@ -131,8 +131,8 @@ def get_ClovaSpeechSR(file, lang):
 
 def get_stt(file, lang='ko', stt_engine='naver'):
     if stt_engine.lower() == 'naver':
-        return naver_transcribe_file(file, lang)
-        #return get_ClovaSpeechSR(file, lang)
+        #return naver_transcribe_file(file, lang)
+        return get_ClovaSpeechSR(file, lang)
     else:
         return "Error"
 
@@ -310,7 +310,8 @@ def upload_file():
 @app.route('/result', methods=['POST'])
 def show_result():
     if request.method == 'POST':
-        sessionid = request.args.get('sessionid')
+        params = request.get_json()
+        sessionid = int(params['sessionid'])
 
         session_dir = get_sessiondir(sessionid)
         result_file = f"{session_dir}{RESULT_FILE}"
