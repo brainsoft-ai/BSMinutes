@@ -179,7 +179,7 @@ def process_data(sessionid):
     time1 = uploaded_data[0][1]
     file1 = uploaded_data[0][2]
     filepath1 = f"{UPLOAD_FOLDER}{file1}"
-    file_out1 = file1[:-4]+".wav"
+    file_out1 = file1[:-4]+"wav"
     filepath_out1 = f"{UPLOAD_FOLDER}{file_out1}"
     convert_webm2wav(filepath1, filepath_out1)
     wav1, sr1 = torchaudio.load(filepath_out1)
@@ -190,7 +190,7 @@ def process_data(sessionid):
     time2 = uploaded_data[1][1]
     file2 = uploaded_data[1][2]
     filepath2 = f"{UPLOAD_FOLDER}{file2}"
-    file_out2 = file2[:-4]+".wav"
+    file_out2 = file2[:-4]+"wav"
     filepath_out2 = f"{UPLOAD_FOLDER}{file_out2}"
     convert_webm2wav(filepath2, filepath_out2)
     wav2, sr2 = torchaudio.load(filepath_out2)
@@ -204,7 +204,7 @@ def process_data(sessionid):
     # sync and mix audio files
     wav1, wav2 = sync_audio(wav1, time1, wav2, time2, sr)
     wav = mix_mono2stereo(wav1, 1.0, 0.0, wav2, 0.0, 1.0)
-    mix_path = os.path.join(session_dir, f"{sessionid}_mix.wav")
+    mix_path = os.path.join(session_dir, "mix.wav")
     torchaudio.save(mix_path, wav, sr)
 
     # get djs and do find_max
@@ -264,8 +264,7 @@ def upload_file():
             return redirect(request.url)
 
         if file and allowed_file(file.filename):
-            filename = secure_filename(f"{timestamp}_{userid}_{file.filename}")
-            filename = filename[:-4]+"mp3"
+            filename = secure_filename(f"{userid}.webm")
             file.save(f"{UPLOAD_FOLDER}{filename}")
         else:
             flash('file type not supported')
