@@ -105,6 +105,8 @@ class DJT():
             wav = self._greenTF.inverse(sin_spec, cos_spec)
             wavs.append(wav.squeeze())
 
+        #wav = self._greenTF.inverse(sspec, cspec)
+
         samples_float32 = torch.stack(wavs, dim=1)
         abs_max = torch.abs(samples_float32).max()
         if abs_max > 1.:

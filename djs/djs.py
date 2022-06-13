@@ -24,7 +24,7 @@ class DJS():
     
     - save/load: tensor transpose must be revamped
     '''
-    def __init__(self, file_path=None, sin_spec=None, cos_spec=None, config=None):
+    def __init__(self, *, file_path=None, sin_spec=None, cos_spec=None, config=None):
 
         try:
             self.load(file_path)
