@@ -1,7 +1,7 @@
 import os
 from os.path import isdir
 import subprocess
-from flask import Flask, flash, request, redirect, url_for, jsonify, render_template, send_file
+from flask import Flask, flash, request, redirect, url_for, jsonify, render_template, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 import json, requests
 import torch, torchaudio
@@ -32,6 +32,7 @@ app = Flask(__name__,
             static_folder='static',
             template_folder='templates')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['RESULT_FOLDER'] = RESULT_FOLDER
 
 
 def convert_webm2wav(file_in, file_out):
@@ -281,6 +282,10 @@ def index():
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/result/<path:path>')
+def static_file(path):
+    return send_from_directory(app.config['RESULT_FOLDER'], path)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
