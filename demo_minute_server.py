@@ -21,6 +21,7 @@ uploaded_data = [] #(id, timestamp, filepath)
 processed_data = {}
 data_semaphore = 0
 sessionid = 0
+processingid = 0
 
 SAMPLE_RATE = 16000
 djt_mix = DJT(sample_rate=SAMPLE_RATE, channels=2)
@@ -126,13 +127,13 @@ def naver_transcribe_file(pcm_file, lang):
         return "Error : " + response.text
 
 def get_ClovaSpeechSR(file, lang):
-    res = ClovaSpeechClient().req_upload(file=file, completion='sync')
+    res = ClovaSpeechClient().req_upload(file=file, completion='sync') #diarization test necessary??
     return res
 
 def get_stt(file, lang='ko', stt_engine='naver'):
     if stt_engine.lower() == 'naver':
-        return naver_transcribe_file(file, lang)
-        #return get_ClovaSpeechSR(file, lang)
+        #return naver_transcribe_file(file, lang)
+        return get_ClovaSpeechSR(file, lang)
     else:
         return "Error"
 
@@ -179,6 +180,9 @@ def clear_download_data():
         os.remove(f"{UPLOAD_FOLDER}{file}")
 
 def process_data(sessionid):
+    global processingid
+    processingid = sessionid
+
     session_dir = get_sessiondir(sessionid)
     if not isdir(session_dir):
         os.mkdir(session_dir)
@@ -237,12 +241,28 @@ def process_data(sessionid):
     wav2 = djt_inv.djs2wav(djs2, save=True, wav_path=new_path2)
 
     # get stt and save them
-    result1 = get_stt(new_path1)
-    result2 = get_stt(new_path2)
-
     json_data = {}
-    json_data[user1] = result1
-    json_data[user2] = result2
+    result1 = get_stt(new_path1)
+    json_data1 = json.loads(result1.text)
+    segment_data = []
+    for segment in json_data1['segments']:
+        text_data = {}
+        text_data['start'] = segment['start']
+        text_data['end'] = segment['end']
+        text_data['text'] = segment['text']
+        segment_data.append(text_data)
+    json_data[user1] = segment_data
+
+    result2 = get_stt(new_path2)
+    json_data2 = json.loads(result2.text)
+    segment_data = []
+    for segment in json_data2['segments']:
+        text_data = {}
+        text_data['start'] = segment['start']
+        text_data['end'] = segment['end']
+        text_data['text'] = segment['text']
+        segment_data.append(text_data)
+    json_data[user2] = segment_data
 
     stt_result_path = f"{session_dir}/stt_result.json"
     with open(stt_result_path, 'w') as outfile:
@@ -251,6 +271,7 @@ def process_data(sessionid):
     #zip_session_content(sessionid)
 
     clear_download_data()
+    processingid = 0
 
 @app.route('/')
 def index():
@@ -326,6 +347,26 @@ def show_result():
         except FileNotFoundError:
             abort(404)
 
+
+@app.route('/check_session_complete', methods=['POST'])
+def check_session_complete():
+    if request.method == 'POST':
+        params = request.get_json()
+        sessionid = int(params['sessionid'])
+
+        global processingid
+        if processingid != 0:
+            return jsonify(
+                result = 'processing',
+                sessionid = sessionid
+            )
+        else:
+            return jsonify(
+                result = 'OK',
+                sessionid = sessionid
+            )
+    else:
+        return ""
 
 if __name__ == "__main__":
     if not isdir(UPLOAD_FOLDER):
