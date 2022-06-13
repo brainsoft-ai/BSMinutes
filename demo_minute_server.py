@@ -131,8 +131,8 @@ def get_ClovaSpeechSR(file, lang):
 
 def get_stt(file, lang='ko', stt_engine='naver'):
     if stt_engine.lower() == 'naver':
-        #return naver_transcribe_file(file, lang)
-        return get_ClovaSpeechSR(file, lang)
+        return naver_transcribe_file(file, lang)
+        #return get_ClovaSpeechSR(file, lang)
     else:
         return "Error"
 
@@ -193,7 +193,7 @@ def process_data(sessionid):
     time1 = uploaded_data[0][1]
     file1 = uploaded_data[0][2]
     filepath1 = f"{UPLOAD_FOLDER}{file1}"
-    file_out1 = file1[:-4]+"wav"
+    file_out1 = f"{user1}_{time1}.wav"
     filepath_out1 = f"{UPLOAD_FOLDER}{file_out1}"
     convert_webm2wav(filepath1, filepath_out1)
     wav1, sr1 = torchaudio.load(filepath_out1)
@@ -204,7 +204,7 @@ def process_data(sessionid):
     time2 = uploaded_data[1][1]
     file2 = uploaded_data[1][2]
     filepath2 = f"{UPLOAD_FOLDER}{file2}"
-    file_out2 = file2[:-4]+"wav"
+    file_out2 = f"{user2}_{time2}.wav"
     filepath_out2 = f"{UPLOAD_FOLDER}{file_out2}"
     convert_webm2wav(filepath2, filepath_out2)
     wav2, sr2 = torchaudio.load(filepath_out2)
@@ -229,8 +229,10 @@ def process_data(sessionid):
 
     # save processed djs to wav
     #djt_inv = DJT(sample_rate=sr, channels=1)
+    file_out1 = f"{user1}.wav"
     new_path1 = f"{session_dir}/{file_out1}"
     wav1 = djt_inv.djs2wav(djs1, save=True, wav_path=new_path1)
+    file_out2 = f"{user2}.wav"
     new_path2 = f"{session_dir}/{file_out2}"
     wav2 = djt_inv.djs2wav(djs2, save=True, wav_path=new_path2)
 
@@ -246,7 +248,7 @@ def process_data(sessionid):
     with open(stt_result_path, 'w') as outfile:
         json.dump(json_data, outfile, indent=4)
 
-    zip_session_content(sessionid)
+    #zip_session_content(sessionid)
 
     clear_download_data()
 
