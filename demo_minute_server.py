@@ -1,6 +1,7 @@
 import os
 from os.path import isdir
 import subprocess
+import threading
 from flask import Flask, flash, request, redirect, url_for, jsonify, render_template, send_file
 from werkzeug.utils import secure_filename
 import json, requests
@@ -322,7 +323,10 @@ def upload_file():
             uploaded_data.append((userid, timestamp, filename))
         elif upload_count == 1:
             uploaded_data.append((userid, timestamp, filename))
-            process_data(sessionid) # run this in a different task/process
+
+            t = threading.Thread(target=process_data, args=(sessionid,))
+            t.start()
+            #process_data(sessionid) # run this in a different task/process
         data_semaphore = 0
 
     return jsonify(
