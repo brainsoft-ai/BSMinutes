@@ -310,7 +310,7 @@ def upload_file():
 @app.route('/result', methods=['POST'])
 def show_result():
     if request.method == 'POST':
-        sessionid = json.loads(request.form['sessionid'])
+        sessionid = request.args.get('sessionid')
 
         session_dir = get_sessiondir(sessionid)
         result_file = f"{session_dir}{RESULT_FILE}"
