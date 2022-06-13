@@ -44,6 +44,9 @@ export default class Modal {
     const $modalAudio = document.createElement("audio");
     $modalAudio.className = "modal-content__audio hidden";
 
+    const $modalTimestamp = document.createElement("div");
+    $modalTimestamp.className = "modal-content__timestamp hidden";
+
     const $modalRec = document.createElement("button");
     $modalRec.className = "modal-content__rec hidden";
 
@@ -59,6 +62,7 @@ export default class Modal {
     $modalContent.appendChild($modalText);
     $modalContent.appendChild($modalHTML);
     $modalContent.appendChild($modalAudio);
+    $modalContent.appendChild($modalTimestamp);
     $modalRec.appendChild($modalRecBtn);
     $modalContent.appendChild($modalRec);
     $modalContent.appendChild($modalOkBtn);
@@ -260,6 +264,9 @@ export default class Modal {
           $modalAudio.src = audioURL;
           $modalAudio.classList.remove("hidden");
           this.recordedChunks = [];
+          
+          document.querySelector('.modal-content__timestamp').textContent = Date.now();
+          
           //$modal.insertBefore(audioElm, $modalRec);
         }
     }
@@ -280,7 +287,7 @@ export default class Modal {
 
           const temp = JSON.stringify({
             id: UserStorage.getUserData(),
-            timestamp: Date.now()});
+            timestamp: document.querySelector('.modal-content__timestamp').textContent});
           formData.append('body', temp);
           formData.append('audio', this.audioBlob, 'recording.'+ext);
           

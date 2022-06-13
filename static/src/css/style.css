@@ -525,6 +525,10 @@ body {
   display: none;
 }
 
+.modal-content__timestamp.hidden {
+  display: none;
+}
+
 .modal-content__rec{
   width: 48px;
   height: 48px;
