@@ -194,7 +194,7 @@ def process_data(sessionid):
             os.remove(path)
 
     user1 = uploaded_data[0][0]
-    time1 = uploaded_data[0][1]
+    time1 = int(uploaded_data[0][1])
     file1 = uploaded_data[0][2]
     filepath1 = f"{UPLOAD_FOLDER}{file1}"
     file_out1 = f"{user1}_{time1}.wav"
@@ -205,7 +205,7 @@ def process_data(sessionid):
     ch1 = len(wav1)
 
     user2 = uploaded_data[1][0]
-    time2 = uploaded_data[1][1]
+    time2 = int(uploaded_data[1][1])
     file2 = uploaded_data[1][2]
     filepath2 = f"{UPLOAD_FOLDER}{file2}"
     file_out2 = f"{user2}_{time2}.wav"
