@@ -262,7 +262,7 @@ export default class Card {
     }
 
 
-    function completeButtonEL(e) {
+    async function completeButtonEL(e) {
       e.stopPropagation();
 
       let $target = e.target;
@@ -288,13 +288,9 @@ export default class Card {
 
       const $resultContainer = document.querySelector(".result-container");
       
-      const $resultBack = document.createElement("div");
-      $resultBack.className = "result-back";
-      $resultBack.innerHTML =
-        '<i class="fas fa-arrow-left"></i>';
-      $resultContainer.appendChild($resultBack);
+
       
-      function passout(e) {
+      async function passout(e) {
         e.target.removeEventListener("animationend", passout)
         e.target.classList.add("hidden");
         e.target.classList.remove("end");
@@ -310,6 +306,17 @@ export default class Card {
         const $resultText = document.createElement("div");
         $resultText.className = "result-text";
 
+        const $resultBack = document.createElement("div");
+        $resultBack.className = "result-back";
+        $resultBack.innerHTML =
+          '<i class="fas fa-arrow-left"></i>';
+        $resultBack.addEventListener("click", () => {
+          document.querySelector('.add-card-button').classList.remove("hidden");
+          document.querySelector('.filter-container').classList.remove("hidden");
+          document.querySelector('.all-card-container').classList.remove("hidden");
+        });
+        $resultContainer.appendChild($resultBack);
+        
         $resultContainer.appendChild($card_text);
         //$resultContainer.appendChild($card.querySelector(".card__countdown"));
         $resultContainer.appendChild($card.querySelector(".card__date-container"));
@@ -324,6 +331,15 @@ export default class Card {
           $resultContainer.classList.remove("animation");
         }
         $resultContainer.addEventListener("animationend", passin);
+        
+        await fetch('http://127.0.0.1:5000/result', {
+          method: 'POST',
+          body: {
+            sessionid:$card.querySelector(".card__session-container").textContent,
+          },
+        })
+        .then((response)=>(response.json()))
+        .then((result) => ($resultText.textContent = result))
       }
       $card.parentNode.addEventListener("animationend", passout);
       
@@ -757,7 +773,7 @@ export default class Card {
 
       const $toggleMenuButton = document.createElement("button");
       $toggleMenuButton.className = "card-menu toggle";
-      $toggleMenuButton.innerHTML = '<i class="fas fa-bars"></i>';
+      $toggleMenuButton.innerHTML = '<i class="fas fa-arrow-right"></i>';
       $toggleMenuButton.addEventListener("click", toggleMenuButtonEL_click);
       $toggleMenuButton.addEventListener(
         "focusout",
