@@ -44,6 +44,9 @@ export default class Modal {
     const $modalAudio = document.createElement("audio");
     $modalAudio.className = "modal-content__audio hidden";
 
+    const $modalTimestamp = document.createElement("div");
+    $modalTimestamp.className = "modal-content__timestamp hidden";
+
     const $modalRec = document.createElement("button");
     $modalRec.className = "modal-content__rec hidden";
 
@@ -59,6 +62,7 @@ export default class Modal {
     $modalContent.appendChild($modalText);
     $modalContent.appendChild($modalHTML);
     $modalContent.appendChild($modalAudio);
+    $modalContent.appendChild($modalTimestamp);
     $modalRec.appendChild($modalRecBtn);
     $modalContent.appendChild($modalRec);
     $modalContent.appendChild($modalOkBtn);
@@ -260,6 +264,7 @@ export default class Modal {
           $modalAudio.src = audioURL;
           $modalAudio.classList.remove("hidden");
           this.recordedChunks = [];
+          
           //$modal.insertBefore(audioElm, $modalRec);
         }
     }
@@ -274,13 +279,14 @@ export default class Modal {
         if (text.length <= 14) {
             
           const formData = new FormData();
+          const timestamp = document.querySelector('.modal-content__timestamp').textContent;
 
           const ext = ["audio/webm", "audio/ogg", "audio/mp4"]
           .filter(MediaRecorder.isTypeSupported)[0].slice(6);
 
           const temp = JSON.stringify({
             id: UserStorage.getUserData(),
-            timestamp: Date.now()});
+            timestamp: timestamp});
           formData.append('body', temp);
           formData.append('audio', this.audioBlob, 'recording.'+ext);
           
@@ -309,6 +315,7 @@ export default class Modal {
     }
     else{
       $modalRecBtn.classList.add("focused");
+      document.querySelector('.modal-content__timestamp').textContent = Date.now();
       this.mediaRecorder.start();
     }
     
