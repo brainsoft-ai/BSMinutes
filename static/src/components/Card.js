@@ -5,6 +5,7 @@ import {
 } from "../utils/CustomStorage.js";
 import { Hash } from "../utils/Hash.js";
 
+
 export default class Card {
   constructor(
     {
@@ -330,25 +331,41 @@ export default class Card {
         })
         .then((response)=>(response.json()))
         .then((result) => {
-          if(result["result"] = "processing"){
+          console.log(result);
+          console.log(result.result);
+          console.log(result["result"]);
+          if(result["result"] == "processing"){
             $resultText.textContent = "작업 중입니다."
           }
           else{
-            jsonData = require(sessionid.padStart(5,'0')+'/stt_result.json');
-            for(var key in jsonData){
-              const $sentenceUser = document.createElement("div");
-              $sentenceUser.className = "result-user-container";
-              $sentenceUser.textContent = key;
-
-              const $sentenceText = document.createElement("div");
-              $sentenceText.className = "result-text-container";
-              $sentenceText.textContent = jsonData[key];
-
-              $resultText.appendChild($sentenceUser); 
-              $resultText.appendChild($sentenceText); 
-            }
+            fetch('http://127.0.0.1:5000/result/'+sessionid.padStart(5,'0')+'/stt_result.json')
+              .then(Response => Response.json())
+              .then(data => {
+                  let results = [];
+                  for(var key in data){
+                    data[key].slice(0).forEach(function(item){
+                    item["user"] = key;
+                    results.push(item);
+                    })
+                  }
+                  results.sort(function(a,b) {
+                    return a.start - b.start;
+                  });
+                  results.forEach(function(item){
+                    const $sentenceUser = document.createElement("div");
+                    $sentenceUser.className = "result-user-container";
+                    $sentenceUser.textContent = item.user;
+      
+                    const $sentenceText = document.createElement("div");
+                    $sentenceText.className = "result-text-container";
+                    $sentenceText.textContent = item.text;
+      
+                    $resultText.appendChild($sentenceUser); 
+                    $resultText.appendChild($sentenceText); 
+                  })
+              })
           }
-        })
+        });
 
         $resultContainer.appendChild($resultBack);
         $resultContainer.appendChild($card_text);
