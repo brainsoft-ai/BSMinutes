@@ -288,8 +288,6 @@ export default class Card {
 
       const $resultContainer = document.querySelector(".result-container");
       
-
-      
       async function passout(e) {
         e.target.removeEventListener("animationend", passout)
         e.target.classList.add("hidden");
@@ -315,10 +313,45 @@ export default class Card {
           document.querySelector('.filter-container').classList.remove("hidden");
           document.querySelector('.all-card-container').classList.remove("hidden");
         });
-        $resultContainer.appendChild($resultBack);
+
+
+        $resultContainer.innerHTML = '';
+
         
+        const sessionid = $card.querySelector(".card__session-container").textContent;
+        await fetch('http://127.0.0.1:5000/check_session_complete', {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body : JSON.stringify({
+            "sessionid": sessionid,
+          }),
+        })
+        .then((response)=>(response.json()))
+        .then((result) => {
+          if(result["result"] = "processing"){
+            $resultText.textContent = "작업 중입니다."
+          }
+          else{
+            jsonData = require(sessionid.padStart(5,'0')+'/stt_result.json');
+            for(var key in jsonData){
+              const $sentenceUser = document.createElement("div");
+              $sentenceUser.className = "result-user-container";
+              $sentenceUser.textContent = key;
+
+              const $sentenceText = document.createElement("div");
+              $sentenceText.className = "result-text-container";
+              $sentenceText.textContent = jsonData[key];
+
+              $resultText.appendChild($sentenceUser); 
+              $resultText.appendChild($sentenceText); 
+            }
+          }
+        })
+
+        $resultContainer.appendChild($resultBack);
         $resultContainer.appendChild($card_text);
-        //$resultContainer.appendChild($card.querySelector(".card__countdown"));
         $resultContainer.appendChild($card.querySelector(".card__date-container"));
         $resultContainer.appendChild($card.querySelector(".card__tag-container"));
         $resultContainer.appendChild($modalAudio);
@@ -331,15 +364,6 @@ export default class Card {
           $resultContainer.classList.remove("animation");
         }
         $resultContainer.addEventListener("animationend", passin);
-        
-        await fetch('http://127.0.0.1:5000/result', {
-          method: 'POST',
-          body: {
-            sessionid:$card.querySelector(".card__session-container").textContent,
-          },
-        })
-        .then((response)=>(response.json()))
-        .then((result) => ($resultText.textContent = result))
       }
       $card.parentNode.addEventListener("animationend", passout);
       
