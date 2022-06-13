@@ -5,6 +5,13 @@ import {
 } from "../utils/CustomStorage.js";
 import { Hash } from "../utils/Hash.js";
 
+function convertTime(milliSecond) {
+  const hour = String(Math.floor((milliSecond/ (1000 * 60 *60 )) % 24 )).padStart(2, "0"); // 시
+  const minutes = String(Math.floor((milliSecond  / (1000 * 60 )) % 60 )).padStart(2, "0"); // 분
+  const second = String(Math.floor((milliSecond / 1000 ) % 60)).padStart(2, "0"); // 초
+  const milli = String(Math.floor((milliSecond / 10 ) % 60)).padStart(2, "0"); // 초
+  return `${hour}:${minutes}:${second}.${milli}`;
+}
 
 export default class Card {
   constructor(
@@ -354,7 +361,7 @@ export default class Card {
                   results.forEach(function(item){
                     const $sentenceUser = document.createElement("div");
                     $sentenceUser.className = "result-user-container";
-                    $sentenceUser.textContent = item.user;
+                    $sentenceUser.textContent = item.user + " " + convertTime(item.start);
       
                     const $sentenceText = document.createElement("div");
                     $sentenceText.className = "result-text-container";
