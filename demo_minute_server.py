@@ -11,6 +11,8 @@ import zipfile
 from djs.djs import DJS
 from djs.djt import DJT
 
+from clovaspeechclient import ClovaSpeechClient
+
 RESULT_FOLDER = './results/'
 RESULT_FILE = 'result.zip'
 UPLOAD_FOLDER = './downloads/'
@@ -123,9 +125,14 @@ def naver_transcribe_file(pcm_file, lang):
     else:
         return "Error : " + response.text
 
+def get_ClovaSpeechSR(file, lang):
+    res = ClovaSpeechClient().req_upload(file=file, completion='sync')
+    return res
+
 def get_stt(file, lang='ko', stt_engine='naver'):
     if stt_engine.lower() == 'naver':
         return naver_transcribe_file(file, lang)
+        #return get_ClovaSpeechSR(file, lang)
     else:
         return "Error"
 
@@ -163,6 +170,13 @@ def zip_session_content(sessionid):
     zipf.close()
 
     os.rename(temp_zip, final_zip)
+
+def clear_download_data():
+    uploaded_data.clear()
+    files = os.listdir(UPLOAD_FOLDER)
+    for file in files:
+        print(file)
+        os.remove(f"{UPLOAD_FOLDER}{file}")
 
 def process_data(sessionid):
     session_dir = get_sessiondir(sessionid)
@@ -233,7 +247,8 @@ def process_data(sessionid):
         json.dump(json_data, outfile, indent=4)
 
     zip_session_content(sessionid)
-    uploaded_data.clear()
+
+    clear_download_data()
 
 @app.route('/')
 def index():
@@ -264,7 +279,7 @@ def upload_file():
             return redirect(request.url)
 
         if file and allowed_file(file.filename):
-            filename = secure_filename(f"{userid}.webm")
+            filename = secure_filename(f"{userid}_{timestamp}.webm")
             file.save(f"{UPLOAD_FOLDER}{filename}")
         else:
             flash('file type not supported')
