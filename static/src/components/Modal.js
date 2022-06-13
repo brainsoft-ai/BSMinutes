@@ -265,8 +265,6 @@ export default class Modal {
           $modalAudio.classList.remove("hidden");
           this.recordedChunks = [];
           
-          document.querySelector('.modal-content__timestamp').textContent = Date.now();
-          
           //$modal.insertBefore(audioElm, $modalRec);
         }
     }
@@ -281,13 +279,14 @@ export default class Modal {
         if (text.length <= 14) {
             
           const formData = new FormData();
+          const timestamp = document.querySelector('.modal-content__timestamp').textContent;
 
           const ext = ["audio/webm", "audio/ogg", "audio/mp4"]
           .filter(MediaRecorder.isTypeSupported)[0].slice(6);
 
           const temp = JSON.stringify({
             id: UserStorage.getUserData(),
-            timestamp: document.querySelector('.modal-content__timestamp').textContent});
+            timestamp: timestamp});
           formData.append('body', temp);
           formData.append('audio', this.audioBlob, 'recording.'+ext);
           
@@ -316,6 +315,7 @@ export default class Modal {
     }
     else{
       $modalRecBtn.classList.add("focused");
+      document.querySelector('.modal-content__timestamp').textContent = Date.now();
       this.mediaRecorder.start();
     }
     
