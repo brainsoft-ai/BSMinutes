@@ -40,7 +40,7 @@ app.config['RESULT_FOLDER'] = RESULT_FOLDER
 
 
 def convert_webm2wav(file_in, file_out):
-    command = ['ffmpeg', '-i', file_in, '-c:a', 'pcm_f32le', file_out]
+    command = ['C:/Program Files/ffmpeg/bin/ffmpeg.exe', '-i', file_in, '-c:a', 'pcm_f32le', file_out]
     subprocess.run(command,stdout=subprocess.PIPE,stdin=subprocess.PIPE)
 
 
@@ -93,8 +93,8 @@ def mix_mono2stereo_file(file1, ratio1_l, ratio1_r, file2, ratio2_l, ratio2_r):
     return sr1, wav_data
 
 def find_max(spec):
-    sin_spec = spec.get_sin_spectrogram()
-    cos_spec = spec.get_cos_spectrogram()
+    sin_spec = spec.get_sin_spectrogram().cpu()
+    cos_spec = spec.get_cos_spectrogram().cpu()
     sin_spec_l, sin_spec_r = sin_spec[0], sin_spec[1]
     cos_spec_l, cos_spec_r = cos_spec[0], cos_spec[1]
     amp_l = (sin_spec_l ** 2 + cos_spec_l ** 2) ** 0.5
@@ -255,7 +255,7 @@ def process_data(sessionid):
     wav1 = djt_inv.djs2wav(djs1, save=True, wav_path=new_path1)
     file_out2 = f"{user2}.wav"
     new_path2 = f"{session_dir}{file_out2}"
-    wav2 = djt_inv.djs2wav(djs2, save=True, wav_path=new_path2)
+    wav2 = djt_inv.djs2wav(djs2.cuda(), save=True, wav_path=new_path2)
 
 
     # get stt and save them
