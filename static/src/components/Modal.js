@@ -250,7 +250,7 @@ export default class Modal {
       formData.append('body', temp);
       formData.append('audio', this.audioBlob, 'recording.'+ext);
       
-      await fetch('http://127.0.0.1:5000/upload', {
+      await fetch('http://192.168.130.102:5000/upload', {
         method: 'POST',
         body: formData,
       })

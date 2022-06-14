@@ -330,7 +330,7 @@ export default class Card {
 
         
         const sessionid = $card.querySelector(".card__session-container").textContent;
-        await fetch('http://127.0.0.1:5000/check_session_complete', {
+        await fetch('http://192.168.130.102:5000/check_session_complete', {
           method: 'POST',
           headers: {
             "Content-Type": "application/json"
@@ -348,7 +348,7 @@ export default class Card {
             $resultText.textContent = "작업 중입니다."
           }
           else{
-            fetch('http://127.0.0.1:5000/result/'+sessionid.padStart(5,'0')+'/stt_result.json')
+            fetch('http://192.168.130.102:5000/result/'+sessionid.padStart(5,'0')+'/stt_result.json')
               .then(Response => Response.json())
               .then(data => {
                   let results = [];
