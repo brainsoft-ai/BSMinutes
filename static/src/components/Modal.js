@@ -274,7 +274,8 @@ export default class Modal {
       $modalRecBtn.classList.remove("focused");
       this.mediaRecorder.stop();
       $modalOkBtn.classList.remove("nope"); 
-      $modalOkBtn.addEventListener("click", async() => {
+      async function okbutton() {
+        $modalOkBtn.removeEventListener("click", okbutton);
         const text = document.querySelector(".todo__input").value;
         if (text.length <= 14) {
             
@@ -310,7 +311,8 @@ export default class Modal {
             }
           });
         }
-      });
+      }
+      $modalOkBtn.addEventListener("click", okbutton);
 
     }
     else{
