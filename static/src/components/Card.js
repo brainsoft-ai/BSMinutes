@@ -1,7 +1,7 @@
 import {
   CardStorage,
   LangStorage,
-  UserStorage,
+  UserStorage
 } from "../utils/CustomStorage.js";
 import { Hash } from "../utils/Hash.js";
 
@@ -277,6 +277,7 @@ export default class Card {
         const $modalAudio = document.createElement("audio");
         $modalAudio.className = "modal-content__audio";
         $modalAudio.controls = true;
+        
         const $resultText = document.createElement("div");
         $resultText.className = "result-text";
 
@@ -295,7 +296,7 @@ export default class Card {
 
         
         const sessionid = $card.querySelector(".card__session-container").textContent;
-        await fetch('http://192.168.130.102:5000/check_session_complete', {
+        await fetch('https://192.168.130.102/check_session_complete', {
           method: 'POST',
           headers: {
             "Content-Type": "application/json"
@@ -310,7 +311,7 @@ export default class Card {
             $resultText.textContent = "작업 중입니다."
           }
           else{
-            fetch('http://192.168.130.102:5000/result/'+sessionid.padStart(5,'0')+'/stt_result.json')
+            fetch('https://192.168.130.102/result/'+sessionid.padStart(5,'0')+'/stt_result.json')
               .then(Response => Response.json())
               .then(data => {
                   let results = [];
@@ -344,6 +345,10 @@ export default class Card {
                   console.log(item);
                 })
               })
+            
+            fetch('https://192.168.130.102/result/'+sessionid.padStart(5,'0')+"/"+UserStorage.getUserData()+'.wav')
+              .then(Response => console.log(Response))
+
           }
         });
 
