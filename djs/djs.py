@@ -117,6 +117,26 @@ class DJS():
             f.write(struct.pack('i', halfLifeMsec))
             f.write(data.tobytes())
 
+    def cpu():
+        if self._sin_spec != None:
+            self._sin_spec.cpu()
+        if self._cos_spec != None:
+            self._cos_spec.cpu()
+        if self._amp_spec != None:
+            self._amp_spec.cpu()
+        if self._pha_spec != None:
+            self._pha_spec.cpu()
+
+    def cuda():
+        if self._sin_spec != None:
+            self._sin_spec.cuda()
+        if self._cos_spec != None:
+            self._cos_spec.cuda()
+        if self._amp_spec != None:
+            self._amp_spec.cuda()
+        if self._pha_spec != None:
+            self._pha_spec.cuda() 
+
     # for various DJS drawing purposes in the future
     def draw(self):
         start_time = 0
