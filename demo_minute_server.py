@@ -1,5 +1,6 @@
 import os
 from os.path import isdir
+import ssl
 import subprocess
 import threading
 from flask import Flask, flash, request, redirect, url_for, jsonify, render_template, send_file, send_from_directory
@@ -379,4 +380,7 @@ if __name__ == "__main__":
     if not isdir(RESULT_FOLDER):
         os.mkdir(RESULT_FOLDER)
 
-    app.run(host="0.0.0.0", port=5000, debug=True, threaded=True)
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+    ssl_context.load_cert_chain(certfile='ssl/cert.pem', keyfile='ssl/key.pem', password='louie')
+
+    app.run(host="0.0.0.0", port=443, debug=True, threaded=True, ssl_context=ssl_context)
