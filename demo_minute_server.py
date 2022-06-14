@@ -138,23 +138,24 @@ def get_stt(file, lang='ko', stt_engine='naver'):
     if stt_engine.lower() == 'naver':
         #res = naver_transcribe_file(file, lang)
         res = get_ClovaSpeechSR(file, lang)
+        json_data = json.loads(res.text)
+        if 'segments' in json_data:
+            segment_data = []
+            for segment in json_data['segments']:
+                text_data = {}
+                text_data['start'] = segment['start']
+                text_data['end'] = segment['end']
+                text_data['text'] = segment['text']
+                segment_data.append(text_data)
+            return segment_data
+        elif 'text' in json_data:
+            return json_data['text']
+        else:
+            return json_data['message']
+    elif stt_engine.lower() == 'google':
+        return "Not supported yet"
     else:
         return "Error"
-
-    json_data = json.loads(res.text)
-    if 'segments' in json_data:
-        segment_data = []
-        for segment in json_data['segments']:
-            text_data = {}
-            text_data['start'] = segment['start']
-            text_data['end'] = segment['end']
-            text_data['text'] = segment['text']
-            segment_data.append(text_data)
-        return segment_data
-    elif 'text' in json_data:
-        return json_data['text']
-    else:
-        return json_data['message']
 
 def get_session_data(sessionid):
     session_dir = get_sessiondir(sessionid)
@@ -317,11 +318,15 @@ def upload_file():
             sessionid += 1
             uploaded_data.append((userid, timestamp, filename))
         elif upload_count == 1:
-            uploaded_data.append((userid, timestamp, filename))
+            # ignore if the userid is same as before
+            if userid == uploaded_data[0][0]:
+                pass
+            else:
+                uploaded_data.append((userid, timestamp, filename))
 
-            t = threading.Thread(target=process_data, args=(sessionid,))
-            t.start()
-            #process_data(sessionid)
+                t = threading.Thread(target=process_data, args=(sessionid,))
+                t.start()
+                #process_data(sessionid)
         data_lock.release()
 
     return jsonify(
