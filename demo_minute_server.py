@@ -93,8 +93,8 @@ def mix_mono2stereo_file(file1, ratio1_l, ratio1_r, file2, ratio2_l, ratio2_r):
     return sr1, wav_data
 
 def find_max(spec):
-    sin_spec = spec.get_sin_spectrogram().cpu()
-    cos_spec = spec.get_cos_spectrogram().cpu()
+    sin_spec = spec.get_sin_spectrogram()
+    cos_spec = spec.get_cos_spectrogram()
     sin_spec_l, sin_spec_r = sin_spec[0], sin_spec[1]
     cos_spec_l, cos_spec_r = cos_spec[0], cos_spec[1]
     amp_l = (sin_spec_l ** 2 + cos_spec_l ** 2) ** 0.5
@@ -246,13 +246,14 @@ def process_data(sessionid):
     wav = wav.T.to('cuda')
     #djt_mix = DJT(sample_rate=sr, channels=2) # mix audio channel is always 2
     djs = djt_mix.wav2djs(wav)
+    djs.cpu()
     djs1, djs2 = find_max(djs)
 
     # save processed djs to wav
     #djt_inv = DJT(sample_rate=sr, channels=1)
     file_out1 = f"{user1}.wav"
     new_path1 = f"{session_dir}{file_out1}"
-    wav1 = djt_inv.djs2wav(djs1, save=True, wav_path=new_path1)
+    wav1 = djt_inv.djs2wav(djs1.cuda(), save=True, wav_path=new_path1)
     file_out2 = f"{user2}.wav"
     new_path2 = f"{session_dir}{file_out2}"
     wav2 = djt_inv.djs2wav(djs2.cuda(), save=True, wav_path=new_path2)
