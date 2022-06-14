@@ -379,4 +379,4 @@ if __name__ == "__main__":
     if not isdir(RESULT_FOLDER):
         os.mkdir(RESULT_FOLDER)
 
-    app.run(host="127.0.0.1", port=5000, debug=True, threaded=True)
+    app.run(host="0.0.0.0", port=5000, debug=True, threaded=True)
