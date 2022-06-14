@@ -8,6 +8,7 @@ export default class Modal {
     this.closeModal = this.closeModal.bind(this);
     this.record = this.record.bind(this);
     this.ok = this.ok.bind(this);
+    this.okbutton = this.okbutton.bind(this);
     
     this.recordedChunks = []; // will be used later to record audio
     this.mediaRecorder = null; // will be used later to record audio
@@ -218,6 +219,58 @@ export default class Modal {
     $RecordBtn.outerHTML = $RecordBtn.outerHTML;
     */
   }
+  
+  async okbutton() {
+    
+    const $modalAudio = this.$modalContainer.querySelector(
+      ".modal-content__audio"
+    );
+
+    const $modalRec = this.$modalContainer.querySelector(
+      ".modal-content__rec"
+    );
+    const $modalRecBtn = $modalRec.querySelector(".modal-content__recbtn");
+    const $modalOkBtn = this.$modalContainer.querySelector(
+      ".modal-content__ok"
+    );
+
+    $modalOkBtn.removeEventListener("click", this.okbutton);
+    const text = document.querySelector(".todo__input").value;
+    if (text.length <= 14) {
+        
+      const formData = new FormData();
+      const timestamp = document.querySelector('.modal-content__timestamp').textContent;
+
+      const ext = ["audio/webm", "audio/ogg", "audio/mp4"]
+      .filter(MediaRecorder.isTypeSupported)[0].slice(6);
+
+      const temp = JSON.stringify({
+        id: UserStorage.getUserData(),
+        timestamp: timestamp});
+      formData.append('body', temp);
+      formData.append('audio', this.audioBlob, 'recording.'+ext);
+      
+      await fetch('http://127.0.0.1:5000/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      .then((response) => response.json())
+      .then((result) => {
+        const $session = document.querySelector(".session-container");
+        $session.textContent = result.sessionid;
+
+        $modalAudio.classList.add("hidden");
+        const $filter = document.querySelector(".modal-content__ok");
+        
+        if (($filter && !$filter.matches(".nope")) || !$filter) { 
+          this.onContinue();
+          this.closeModal();
+          $filter.classList.add("nope");
+          $modalRecBtn.classList.remove("focused");
+        }
+      });
+    }
+  }
 
   ok() {
     const $filter = document.querySelector(".modal-content__ok");
@@ -274,45 +327,8 @@ export default class Modal {
       $modalRecBtn.classList.remove("focused");
       this.mediaRecorder.stop();
       $modalOkBtn.classList.remove("nope"); 
-      async function okbutton() {
-        $modalOkBtn.removeEventListener("click", okbutton);
-        const text = document.querySelector(".todo__input").value;
-        if (text.length <= 14) {
-            
-          const formData = new FormData();
-          const timestamp = document.querySelector('.modal-content__timestamp').textContent;
 
-          const ext = ["audio/webm", "audio/ogg", "audio/mp4"]
-          .filter(MediaRecorder.isTypeSupported)[0].slice(6);
-
-          const temp = JSON.stringify({
-            id: UserStorage.getUserData(),
-            timestamp: timestamp});
-          formData.append('body', temp);
-          formData.append('audio', this.audioBlob, 'recording.'+ext);
-          
-          await fetch('http://127.0.0.1:5000/upload', {
-            method: 'POST',
-            body: formData,
-          })
-          .then((response) => response.json())
-          .then((result) => {
-            const $session = document.querySelector(".session-container");
-            $session.textContent = result.sessionid;
-
-            $modalAudio.classList.add("hidden");
-            const $filter = document.querySelector(".modal-content__ok");
-            
-            if (($filter && !$filter.matches(".nope")) || !$filter) { 
-              this.onContinue();
-              this.closeModal();
-              $filter.classList.add("nope");
-              $modalRecBtn.classList.remove("focused");
-            }
-          });
-        }
-      }
-      $modalOkBtn.addEventListener("click", okbutton);
+      $modalOkBtn.addEventListener("click", this.okbutton);
 
     }
     else{
