@@ -1,6 +1,7 @@
 import os
 from os.path import isdir
 import subprocess
+import threading
 from flask import Flask, flash, request, redirect, url_for, jsonify, render_template, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 import json, requests
@@ -19,7 +20,9 @@ UPLOAD_FOLDER = './downloads/'
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'webm'}
 uploaded_data = [] #(id, timestamp, filepath)
 processed_data = {}
-data_semaphore = 0
+
+data_lock = threading.Lock()
+
 sessionid = 0
 processingid = 0
 
@@ -133,18 +136,31 @@ def get_ClovaSpeechSR(file, lang):
 
 def get_stt(file, lang='ko', stt_engine='naver'):
     if stt_engine.lower() == 'naver':
-        #return naver_transcribe_file(file, lang)
-        return get_ClovaSpeechSR(file, lang)
+        #res = naver_transcribe_file(file, lang)
+        res = get_ClovaSpeechSR(file, lang)
     else:
         return "Error"
 
+    json_data = json.loads(res.text)
+    if 'segments' in json_data:
+        segment_data = []
+        for segment in json_data['segments']:
+            text_data = {}
+            text_data['start'] = segment['start']
+            text_data['end'] = segment['end']
+            text_data['text'] = segment['text']
+            segment_data.append(text_data)
+        return segment_data
+    elif 'text' in json_data:
+        return json_data['text']
+    else:
+        return json_data['message']
 
 def get_session_data(sessionid):
-    session_dir = f"{RESULT_FOLDER}{sessionid:05d}"
+    session_dir = get_sessiondir(sessionid)
     if not isdir(session_dir):
         return "invalid session id"
     else:
-        #remove existing files
         pass
 
 def resample_audio(wav, sr1, sr2):
@@ -166,7 +182,6 @@ def zip_session_content(sessionid):
     
     for folder, subfolders, files in os.walk(session_dir):
         for file in files:
-            print(file)
             zipf.write(os.path.join(folder, file), os.path.relpath(os.path.join(folder,file), session_dir), compress_type = zipfile.ZIP_DEFLATED)
     
     zipf.close()
@@ -177,7 +192,6 @@ def clear_download_data():
     uploaded_data.clear()
     files = os.listdir(UPLOAD_FOLDER)
     for file in files:
-        print(file)
         os.remove(f"{UPLOAD_FOLDER}{file}")
 
 def process_data(sessionid):
@@ -235,39 +249,21 @@ def process_data(sessionid):
     # save processed djs to wav
     #djt_inv = DJT(sample_rate=sr, channels=1)
     file_out1 = f"{user1}.wav"
-    new_path1 = f"{session_dir}/{file_out1}"
+    new_path1 = f"{session_dir}{file_out1}"
     wav1 = djt_inv.djs2wav(djs1, save=True, wav_path=new_path1)
     file_out2 = f"{user2}.wav"
-    new_path2 = f"{session_dir}/{file_out2}"
+    new_path2 = f"{session_dir}{file_out2}"
     wav2 = djt_inv.djs2wav(djs2, save=True, wav_path=new_path2)
 
+
     # get stt and save them
-    json_data = {}
-    result1 = get_stt(new_path1)
-    json_data1 = json.loads(result1.text)
-    segment_data = []
-    for segment in json_data1['segments']:
-        text_data = {}
-        text_data['start'] = segment['start']
-        text_data['end'] = segment['end']
-        text_data['text'] = segment['text']
-        segment_data.append(text_data)
-    json_data[user1] = segment_data
+    stt_result = {}
+    stt_result[user1] = get_stt(new_path1)
+    stt_result[user2] = get_stt(new_path2)
 
-    result2 = get_stt(new_path2)
-    json_data2 = json.loads(result2.text)
-    segment_data = []
-    for segment in json_data2['segments']:
-        text_data = {}
-        text_data['start'] = segment['start']
-        text_data['end'] = segment['end']
-        text_data['text'] = segment['text']
-        segment_data.append(text_data)
-    json_data[user2] = segment_data
-
-    stt_result_path = f"{session_dir}/stt_result.json"
+    stt_result_path = f"{session_dir}stt_result.json"
     with open(stt_result_path, 'w') as outfile:
-        json.dump(json_data, outfile, indent=4)
+        json.dump(stt_result, outfile, indent=4)
 
     #zip_session_content(sessionid)
 
@@ -312,15 +308,10 @@ def upload_file():
         else:
             flash('file type not supported')
 
-        global data_semaphore
+        global data_lock
         global sessionid
 
-        if data_semaphore != 0:
-            return jsonify(
-                result="Processing audio files ... try again a second later"
-            )
-
-        data_semaphore = 1
+        data_lock.acquire()
         upload_count = len(uploaded_data)
         if upload_count == 0:
             sessionid += 1
@@ -330,8 +321,8 @@ def upload_file():
 
             t = threading.Thread(target=process_data, args=(sessionid,))
             t.start()
-            #process_data(sessionid) # run this in a different task/process
-        data_semaphore = 0
+            #process_data(sessionid)
+        data_lock.release()
 
     return jsonify(
         result = 'OK',
