@@ -683,6 +683,21 @@ body {
   position: relative;
   padding: 25px 20px 50px 20px;
   opacity: 0;
+  font-weight: 600;
+}
+
+.result-user-container {
+  font-size: 16px;
+  margin-top: 15px;
+  margin-left: 10px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 600;
+}
+
+.result-text-container {
+  font-size: 16px;
+  margin: 10px;
+  font-weight: 600;
 }
 
 .result-container.animation {

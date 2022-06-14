@@ -1,7 +1,7 @@
 import {
   CardStorage,
-  TagStorage,
   LangStorage,
+  UserStorage,
 } from "../utils/CustomStorage.js";
 import { Hash } from "../utils/Hash.js";
 
@@ -16,7 +16,6 @@ function convertTime(milliSecond) {
 export default class Card {
   constructor(
     {
-      tag,
       countdown,
       text,
       updatedAt,
@@ -32,7 +31,6 @@ export default class Card {
   ) {
     this.sessionid = sessionid;
     this.pinned = pinned;
-    this.tag = tag;
     this.countdown = countdown;
     this.text = text;
     this.updatedAt = updatedAt || this.getCurTime.bind(this)();
@@ -40,7 +38,7 @@ export default class Card {
     this.cardComponent = cardComponent;
     this.modal = modal;
     this.salt = salt || Hash.getSalt();
-    this.id = id || Hash.createHash(text + this.tag.join("") + this.salt);
+    this.id = id || Hash.createHash(text + this.salt);
     this.element = this.createCardElement.bind(this)(isComplete);
 
     this.counter = this.setCounter.bind(this)();
@@ -161,39 +159,7 @@ export default class Card {
   }
 
   createCardElement(isComplete) {
-    function createTag(
-      tag,
-      r,
-      g,
-      b,
-      a,
-      inThumb = false,
-      $tagInnerContainer = null
-    ) {
-      const $tag = document.createElement("div");
-      $tag.className = "tag";
-      $tag.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${a})`;
-
-      const $tagSpan = document.createElement("span");
-      $tagSpan.className = "tag__span";
-      $tagSpan.textContent = "#" + tag;
-
-      $tag.appendChild($tagSpan);
-
-      if (!inThumb) {
-        const $tagRemoveButton = document.createElement("button");
-        $tagRemoveButton.className = "tag__remove";
-        $tagRemoveButton.innerHTML = '<i class="fas fa-times"></i>';
-        $tagRemoveButton.addEventListener("click", () => {
-          $tagInnerContainer.removeChild($tag);
-        });
-
-        $tag.appendChild($tagRemoveButton);
-      }
-
-      return $tag;
-    }
-
+    
     function spliceCardFromToDo($card, cardComponent) {
       if (
         cardComponent.cards.pinnedTodo &&
@@ -307,7 +273,6 @@ export default class Card {
         $card_text.classList.add("detail");
         
         const $card_date = $card.querySelector(".card__date-container").cloneNode(true);
-        const $card_tag = $card.querySelector(".card__tag-container").cloneNode(true);
 
         const $modalAudio = document.createElement("audio");
         $modalAudio.className = "modal-content__audio";
@@ -341,9 +306,6 @@ export default class Card {
         })
         .then((response)=>(response.json()))
         .then((result) => {
-          console.log(result);
-          console.log(result.result);
-          console.log(result["result"]);
           if(result["result"] == "processing"){
             $resultText.textContent = "작업 중입니다."
           }
@@ -364,7 +326,7 @@ export default class Card {
                   results.forEach(function(item){
                     const $sentenceUser = document.createElement("div");
                     $sentenceUser.className = "result-user-container";
-                    $sentenceUser.textContent = item.user + " " + convertTime(item.start);
+                    $sentenceUser.textContent = item.user + " - " + convertTime(item.start);
       
                     const $sentenceText = document.createElement("div");
                     $sentenceText.className = "result-text-container";
@@ -373,6 +335,14 @@ export default class Card {
                     $resultText.appendChild($sentenceUser); 
                     $resultText.appendChild($sentenceText); 
                   })
+                  return Object.keys(data);
+              }).then(keys => {
+                console.log($modalAudio);
+                //$modalAudio.src = 'http://127.0.0.1:5000/result/'+sessionid.padStart(5,'0')+'/'+UserStorage.getUserData()+'.wav';
+                $modalAudio.src = 'http://127.0.0.1:5000/result/'+sessionid.padStart(5,'0')+'/mix.wav';
+                keys.forEach(function(item){
+                  console.log(item);
+                })
               })
           }
         });
@@ -380,7 +350,6 @@ export default class Card {
         $resultContainer.appendChild($resultBack);
         $resultContainer.appendChild($card_text);
         $resultContainer.appendChild($card_date);
-        $resultContainer.appendChild($card_tag);
         $resultContainer.appendChild($modalAudio);
         $resultContainer.appendChild($resultText);
         
@@ -403,21 +372,6 @@ export default class Card {
       const $sender = document.createElement("div");
       $sender.className = "sender";
 
-      const $tagContainer = this.cardComponent.createTagContainer();
-
-      const $tagInnerContainer = $tagContainer.querySelector(
-        ".tag-inner-container"
-      );
-      this.tag.forEach((tag) => {
-        const { r, g, b, a } = TagStorage.getTagObj(tag);
-        const $tag = createTag(tag, r, g, b, a, false, $tagInnerContainer);
-
-        $tagInnerContainer.insertBefore(
-          $tag,
-          $tagContainer.querySelector(".tag__input-container")
-        );
-      });
-
       const $todoInputContainer = this.cardComponent.createToDoContainer();
       $todoInputContainer.querySelector(".todo__input").value = this.text;
       $todoInputContainer
@@ -429,7 +383,6 @@ export default class Card {
       );
       $todoLengthContainer.textContent = `${this.text.length} / 14`;
 
-      $sender.appendChild($tagContainer);
       $sender.appendChild($todoInputContainer);
 
       this.modal.setState({
@@ -439,35 +392,7 @@ export default class Card {
           type: "element",
         },
         onContinue: () => {
-          const $tags = $tagContainer
-            .querySelector(".tag-inner-container")
-            .querySelectorAll(".tag");
-          const tags = [].slice
-            .call($tags)
-            .map(($tag) =>
-              $tag.querySelector(".tag__span").textContent.slice(1)
-            );
 
-          this.tag = tags;
-
-          const $cardTagContainer = this.element.querySelector(
-            ".card__tag-container"
-          );
-          $cardTagContainer.innerHTML = "";
-          this.tag.forEach((tag) => {
-            const { r, g, b, a } = TagStorage.getTagObj(tag);
-            const $tag = createTag(tag, r, g, b, a, true);
-            $cardTagContainer.appendChild($tag);
-          });
-
-          if (this.tag.length === 0) {
-            $cardTagContainer.classList.add("hidden");
-            if (LangStorage.isEnglish()) {
-              $cardTagContainer.textContent = "No Tags";
-            } else {
-              $cardTagContainer.textContent = "태그 없음";
-            }
-          }
 
           const text = $todoInputContainer.querySelector(".todo__input").value;
           if (text.length < 1 || text.length > 14) {
@@ -488,7 +413,6 @@ export default class Card {
           const allCards = CardStorage.getAllCardFromTodo();
           const idx = CardStorage.containsTodo(this.id);
           allCards[idx].text = text;
-          allCards[idx].tag = tags;
           window.localStorage.setItem(
             "card-key-todo",
             JSON.stringify(allCards)
@@ -508,12 +432,6 @@ export default class Card {
               ? [cards.pinnedTodo, ...cards.todo]
               : [...cards.todo]
             ).filter((card) => {
-              if (filterTag.length > card.tag.length) return false;
-
-              for (let i = 0; i < filterTag.length; i++) {
-                if (card.tag.indexOf(filterTag[i]) === -1) return false;
-              }
-
               return true;
             });
 
@@ -633,27 +551,6 @@ export default class Card {
     else{
       $cardText.textContent = this.text;
     }
-
-    const $cardTagContainer = document.createElement("div");
-    $cardTagContainer.className = "card__tag-container";
-
-    if (this.tag.length === 0) {
-      $cardTagContainer.classList.add("hidden");
-      if (LangStorage.isEnglish()) {
-        $cardTagContainer.textContent = "No Tags";
-      } else {
-        $cardTagContainer.textContent = "태그 없음";
-      }
-    } else {
-      this.tag.forEach((tag) => {
-        const tagObj = TagStorage.getTagObj(tag);
-        const { r, g, b, a } = tagObj;
-
-        const $tag = createTag(tag, r, g, b, a, true);
-
-        $cardTagContainer.appendChild($tag);
-      });
-    }
     
     const $cardSessionContainer = document.createElement("div");
     $cardSessionContainer.className = "card__session-container";
@@ -730,7 +627,6 @@ export default class Card {
         const $card = $target.parentNode.parentNode;
         const id = $card.id;
 
-        TagStorage.removeCardId(id);
         CardStorage.removeCardFromTodo(id);
 
         spliceCardFromToDo($card, this.cardComponent);
@@ -776,11 +672,6 @@ export default class Card {
                 ? [cards.pinnedTodo, ...cards.todo]
                 : [...cards.todo]
               ).filter((card) => {
-                if (filterTag.length > card.tag.length) return false;
-
-                for (let i = 0; i < filterTag.length; i++) {
-                  if (card.tag.indexOf(filterTag[i]) === -1) return false;
-                }
 
                 return true;
               });
@@ -789,12 +680,6 @@ export default class Card {
                 ? [cards.pinnedComplete, ...cards.complete]
                 : [...cards.complete]
               ).filter((card) => {
-                if (filterTag.length > card.tag.length) return false;
-
-                for (let i = 0; i < filterTag.length; i++) {
-                  if (card.tag.indexOf(filterTag[i]) === -1) return false;
-                }
-
                 return true;
               });
             }
@@ -848,7 +733,6 @@ export default class Card {
         const $card = $target.parentNode.parentNode;
         const id = $card.id;
 
-        TagStorage.removeCardId(id);
         CardStorage.removeCardFromComplete(id);
 
         spliceCardFromComplete($card, this.cardComponent);
@@ -894,12 +778,6 @@ export default class Card {
                 ? [cards.pinnedTodo, ...cards.todo]
                 : [...cards.todo]
               ).filter((card) => {
-                if (filterTag.length > card.tag.length) return false;
-
-                for (let i = 0; i < filterTag.length; i++) {
-                  if (card.tag.indexOf(filterTag[i]) === -1) return false;
-                }
-
                 return true;
               });
             } else {
@@ -907,11 +785,6 @@ export default class Card {
                 ? [cards.pinnedComplete, ...cards.complete]
                 : [...cards.complete]
               ).filter((card) => {
-                if (filterTag.length > card.tag.length) return false;
-
-                for (let i = 0; i < filterTag.length; i++) {
-                  if (card.tag.indexOf(filterTag[i]) === -1) return false;
-                }
 
                 return true;
               });
@@ -939,7 +812,6 @@ export default class Card {
     $card.appendChild($cardCountdown);
     $card.appendChild($cardPinText);
     $card.appendChild($cardText);
-    $card.appendChild($cardTagContainer);
     $card.appendChild($cardSessionContainer);
     $card.appendChild($cardDateContainer);
     $card.appendChild($cardMenuContainer);
