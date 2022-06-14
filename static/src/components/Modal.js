@@ -1,5 +1,7 @@
 import { UserStorage, LangStorage } from "../utils/CustomStorage.js";
 
+const ip = "10.10.25.184:443";
+
 export default class Modal {
   constructor({ $target }) {
     this.$target = $target;
@@ -250,7 +252,7 @@ export default class Modal {
       formData.append('body', temp);
       formData.append('audio', this.audioBlob, 'recording.'+ext);
       
-      await fetch('https://192.168.130.102/upload', {
+      await fetch('https://'+ip+'/upload', {
         method: 'POST',
         body: formData,
       })

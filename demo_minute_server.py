@@ -40,7 +40,7 @@ app.config['RESULT_FOLDER'] = RESULT_FOLDER
 
 
 def convert_webm2wav(file_in, file_out):
-    command = ['C:/Program Files/ffmpeg/bin/ffmpeg.exe', '-i', file_in, '-c:a', 'pcm_f32le', file_out]
+    command = ['ffmpeg', '-i', file_in, '-c:a', 'pcm_f32le', file_out]
     subprocess.run(command,stdout=subprocess.PIPE,stdin=subprocess.PIPE)
 
 
@@ -246,17 +246,16 @@ def process_data(sessionid):
     wav = wav.T.to('cuda')
     #djt_mix = DJT(sample_rate=sr, channels=2) # mix audio channel is always 2
     djs = djt_mix.wav2djs(wav)
-    djs.cpu()
     djs1, djs2 = find_max(djs)
 
     # save processed djs to wav
     #djt_inv = DJT(sample_rate=sr, channels=1)
     file_out1 = f"{user1}.wav"
     new_path1 = f"{session_dir}{file_out1}"
-    wav1 = djt_inv.djs2wav(djs1.cuda(), save=True, wav_path=new_path1)
+    wav1 = djt_inv.djs2wav(djs1, save=True, wav_path=new_path1)
     file_out2 = f"{user2}.wav"
     new_path2 = f"{session_dir}{file_out2}"
-    wav2 = djt_inv.djs2wav(djs2.cuda(), save=True, wav_path=new_path2)
+    wav2 = djt_inv.djs2wav(djs2, save=True, wav_path=new_path2)
 
 
     # get stt and save them

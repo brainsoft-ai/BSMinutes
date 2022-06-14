@@ -5,6 +5,8 @@ import {
 } from "../utils/CustomStorage.js";
 import { Hash } from "../utils/Hash.js";
 
+const ip = "10.10.25.184:443";
+
 function convertTime(milliSecond) {
   const hour = String(Math.floor((milliSecond/ (1000 * 60 *60 )) % 24 )).padStart(2, "0"); // 시
   const minutes = String(Math.floor((milliSecond  / (1000 * 60 )) % 60 )).padStart(2, "0"); // 분
@@ -274,9 +276,21 @@ export default class Card {
         
         const $card_date = $card.querySelector(".card__date-container").cloneNode(true);
 
+        const $user_tag = document.createElement("div");
+        $user_tag.className = "tag-user-container";
+        
+        const $user_name = document.createElement("div");
+        $user_name.className = "tag-user-name";
+        $user_name.textContent = "모든 사용자";
+
+        const $tag_icon = document.createElement("div");
+        $tag_icon.className = "tag-icon";
+        $tag_icon.innerHTML = `<i class="fad fas fa-arrow-right" ></i>`;
+
         const $modalAudio = document.createElement("audio");
         $modalAudio.className = "modal-content__audio";
         $modalAudio.controls = true;
+        $modalAudio.id = "mix";
         
         const $resultText = document.createElement("div");
         $resultText.className = "result-text";
@@ -296,7 +310,7 @@ export default class Card {
 
         
         const sessionid = $card.querySelector(".card__session-container").textContent;
-        await fetch('https://192.168.130.102/check_session_complete', {
+        await fetch('https://'+ip+'/check_session_complete', {
           method: 'POST',
           headers: {
             "Content-Type": "application/json"
@@ -311,7 +325,7 @@ export default class Card {
             $resultText.textContent = "작업 중입니다."
           }
           else{
-            fetch('https://192.168.130.102/result/'+sessionid.padStart(5,'0')+'/stt_result.json')
+            fetch('https://'+ip+'/result/'+sessionid.padStart(5,'0')+'/stt_result.json')
               .then(Response => Response.json())
               .then(data => {
                   let results = [];
@@ -338,16 +352,36 @@ export default class Card {
                   })
                   return Object.keys(data);
               }).then(keys => {
-                console.log($modalAudio);
-                //$modalAudio.src = 'http://127.0.0.1:5000/result/'+sessionid.padStart(5,'0')+'/'+UserStorage.getUserData()+'.wav';
-                $modalAudio.src = 'http://127.0.0.1:5000/result/'+sessionid.padStart(5,'0')+'/mix.wav';
+                $modalAudio.src = 'https://'+ip+'/result/'+sessionid.padStart(5,'0')+'/'+$modalAudio.id+'.wav';
+                
                 keys.forEach(function(item){
                   console.log(item);
+                  const $resultAudio = document.createElement("audio");
+                  $resultAudio.className = "modal-content__audio hidden";
+                  $resultAudio.controls = true;
+                  $resultAudio.id = item;
+                  $resultAudio.src = 'https://'+ip+'/result/'+sessionid.padStart(5,'0')+'/'+item+'.wav';
+                  $resultContainer.insertBefore($resultAudio, $resultText);
                 })
+                keys.unshift($modalAudio.id);
+                let all_user = $user_name.textContent;
+                let i = 0;
+
+                function get_next_tag() {
+                  i += 1
+                  return keys[i%keys.length]
+                }
+
+                $user_tag.addEventListener('click',() => {
+                  let id = get_next_tag();
+                  
+                  $user_name.textContent = (id != 'mix') ? id : all_user;
+                  keys.forEach(function(item){
+                    document.getElementById(item).classList.add('hidden');
+                  })
+                  document.getElementById(id).classList.remove('hidden');
+                });
               })
-            
-            fetch('https://192.168.130.102/result/'+sessionid.padStart(5,'0')+"/"+UserStorage.getUserData()+'.wav')
-              .then(Response => console.log(Response))
 
           }
         });
@@ -355,8 +389,12 @@ export default class Card {
         $resultContainer.appendChild($resultBack);
         $resultContainer.appendChild($card_text);
         $resultContainer.appendChild($card_date);
+        $user_tag.appendChild($user_name);
+        $user_tag.appendChild($tag_icon);
+        $resultContainer.appendChild($user_tag);
         $resultContainer.appendChild($modalAudio);
         $resultContainer.appendChild($resultText);
+        
         
         $resultContainer.classList.add("animation");
         function passin(e) {
