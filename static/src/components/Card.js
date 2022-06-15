@@ -292,6 +292,10 @@ export default class Card {
         $modalAudio.controls = true;
         $modalAudio.id = "mix";
         
+        const $loader = document.createElement("img");
+        $loader.className = "modal-content__loader hidden";
+        $loader.src = ".../public/loader.svg";
+        
         const $resultText = document.createElement("div");
         $resultText.className = "result-text";
 
@@ -393,6 +397,7 @@ export default class Card {
         $user_tag.appendChild($tag_icon);
         $resultContainer.appendChild($user_tag);
         $resultContainer.appendChild($modalAudio);
+        $resultContainer.appendChild($loader);
         $resultContainer.appendChild($resultText);
         
         
