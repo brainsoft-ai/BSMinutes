@@ -1,5 +1,6 @@
 import os
 from os.path import isdir
+import shutil
 import ssl
 import subprocess
 import threading
@@ -395,7 +396,7 @@ if __name__ == "__main__":
         files = os.listdir(UPLOAD_FOLDER)
         for file in files:
             path = os.path.join(UPLOAD_FOLDER, file)
-            os.remove(path)
+            shutil.rmtree(path)    
 
     if not isdir(RESULT_FOLDER):
         os.mkdir(RESULT_FOLDER)
@@ -403,7 +404,7 @@ if __name__ == "__main__":
         files = os.listdir(RESULT_FOLDER)
         for file in files:
             path = os.path.join(RESULT_FOLDER, file)
-            os.remove(path)        
+            shutil.rmtree(path)        
 
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
     ssl_context.load_cert_chain(certfile='ssl/cert.pem', keyfile='ssl/key.pem', password='louie')
