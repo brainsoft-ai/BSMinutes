@@ -62,7 +62,7 @@ def sync_audio(wav1, time1, wav2, time2, sr):
 
     else:
         tdiff = time2 - time1
-        diff = sr * 3 * tdiff // 1000
+        diff = (sr // 1000) * tdiff
         print("here")
         print(diff , len(wav1[0]) , len(wav2[0]))
         print(diff + len(wav1[0]) - len(wav2[0]))
@@ -111,6 +111,7 @@ def mix_mono2stereo_file(file1, ratio1_l, ratio1_r, file2, ratio2_l, ratio2_r):
     #wav_data2, sr2 = torchaudio.load(file2)
     wav_data2, sr2 = librosa.load(file2)
     wav_data2 = wav_data2.transpose(0,1).squeeze(1)
+    print(sr1, sr2)
     assert(sr1==sr2)
 
     #check mono
