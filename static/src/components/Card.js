@@ -288,13 +288,9 @@ export default class Card {
         $tag_icon.innerHTML = `<i class="fad fas fa-arrow-right" ></i>`;
 
         const $modalAudio = document.createElement("audio");
-        $modalAudio.className = "modal-content__audio";
+        $modalAudio.className = "result-content__audio";
         $modalAudio.controls = true;
         $modalAudio.id = "mix";
-        
-        const $loader = document.createElement("img");
-        $loader.className = "modal-content__loader hidden";
-        $loader.src = ".../public/loader.svg";
         
         const $resultText = document.createElement("div");
         $resultText.className = "result-text";
@@ -361,7 +357,7 @@ export default class Card {
                 keys.forEach(function(item){
                   console.log(item);
                   const $resultAudio = document.createElement("audio");
-                  $resultAudio.className = "modal-content__audio hidden";
+                  $resultAudio.className = "result-content__audio hidden";
                   $resultAudio.controls = true;
                   $resultAudio.id = item;
                   $resultAudio.src = 'https://'+ip+'/result/'+sessionid.padStart(5,'0')+'/'+item+'.wav';
@@ -397,7 +393,6 @@ export default class Card {
         $user_tag.appendChild($tag_icon);
         $resultContainer.appendChild($user_tag);
         $resultContainer.appendChild($modalAudio);
-        $resultContainer.appendChild($loader);
         $resultContainer.appendChild($resultText);
         
         

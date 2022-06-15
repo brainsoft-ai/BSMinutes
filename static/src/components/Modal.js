@@ -46,6 +46,106 @@ export default class Modal {
 
     const $modalAudio = document.createElement("audio");
     $modalAudio.className = "modal-content__audio hidden";
+        
+    const $loader = document.createElement("div");
+    $loader.className = "modal-content__loader hidden";
+    $loader.innerHTML = `<svg id="loader" class="mt-5 mb-3 d-none" version="1.1" id="L4" width="130px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    viewBox="0 0 74 60" enable-background="new 0 0 0 0" xml:space="preserve">
+    <defs>
+      <linearGradient id="grad_svg" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="var(--color-stop)" />
+        <stop offset="100%" stop-color="var(--color-start)" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="25" rx="5" ry="5" width="4" height="10">
+      <animate
+        attributeName="opacity"
+        dur="2s"
+        values="0;1;0"
+        repeatCount="indefinite"
+        begin="0"/>
+    </rect>
+    <rect x="7" y="20" rx="5" ry="5" width="4" height="20">
+      <animate
+        attributeName="opacity"
+        dur="2s"
+        values="0;1;0"
+        repeatCount="indefinite"
+        begin="0"/>    
+    </rect>
+    <rect x="14" y="15" rx="5" ry="4" width="4" height="30">
+      <animate
+        attributeName="opacity"
+        dur="2s"
+        values="0;1;0"
+        repeatCount="indefinite"
+        begin="0.1s"/>    
+    </rect>
+    <rect x="21" y="13" rx="5" ry="4" width="4" height="34">
+      <animate
+        attributeName="opacity"
+        dur="2s"
+        values="0;1;0"
+        repeatCount="indefinite"
+        begin="0.2s"/>    
+    </rect>
+    <rect x="28" y="17" rx="5" ry="4" width="4" height="26">
+      <animate
+        attributeName="opacity"
+        dur="2s"
+        values="0;1;0"
+        repeatCount="indefinite"
+        begin="0.3s"/>    
+    </rect>
+    <rect x="35" y="20" rx="5" ry="5" width="4" height="20">
+      <animate
+        attributeName="opacity"
+        dur="2s"
+        values="0;1;0"
+        repeatCount="indefinite"
+        begin="0.4s"/>    
+    </rect>
+    <rect x="42" y="17" rx="5" ry="4" width="4" height="26">
+      <animate
+        attributeName="opacity"
+        dur="2s"
+        values="0;1;0"
+        repeatCount="indefinite"
+        begin="0.5s"/>    
+    </rect>
+    <rect x="49" y="13" rx="5" ry="4" width="4" height="34">
+      <animate
+        attributeName="opacity"
+        dur="2s"
+        values="0;1;0"
+        repeatCount="indefinite"
+        begin="0.6s"/>    
+    </rect>
+    <rect x="56" y="15" rx="5" ry="4" width="4" height="30">
+      <animate
+        attributeName="opacity"
+        dur="2s"
+        values="0;1;0"
+        repeatCount="indefinite"
+        begin="0.7s"/>    
+    </rect>
+    <rect x="63" y="20" rx="5" ry="5" width="4" height="20">
+      <animate
+        attributeName="opacity"
+        dur="2s"
+        values="0;1;0"
+        repeatCount="indefinite"
+        begin="0.8s"/>    
+    </rect>
+    <rect x="70" y="25" rx="5" ry="5" width="4" height="10">
+      <animate
+        attributeName="opacity"
+        dur="2s"
+        values="0;1;0"
+        repeatCount="indefinite"
+        begin="0.9s"/>    
+    </rect>
+  </svg>`;
 
     const $modalTimestamp = document.createElement("div");
     $modalTimestamp.className = "modal-content__timestamp hidden";
@@ -65,6 +165,7 @@ export default class Modal {
     $modalContent.appendChild($modalText);
     $modalContent.appendChild($modalHTML);
     $modalContent.appendChild($modalAudio);
+    $modalContent.appendChild($loader);
     $modalContent.appendChild($modalTimestamp);
     $modalRec.appendChild($modalRecBtn);
     $modalContent.appendChild($modalRec);
@@ -289,6 +390,10 @@ export default class Modal {
       ".modal-content__audio"
     );
 
+    const $loader = this.$modalContainer.querySelector(
+      ".modal-content__loader"
+    );
+
     const $modalRec = this.$modalContainer.querySelector(
       ".modal-content__rec"
     );
@@ -319,7 +424,6 @@ export default class Modal {
           $modalAudio.src = audioURL;
           $modalAudio.classList.remove("hidden");
           this.recordedChunks = [];
-          
           //$modal.insertBefore(audioElm, $modalRec);
         }
     }
@@ -329,6 +433,7 @@ export default class Modal {
       $modalRecBtn.classList.remove("focused");
       this.mediaRecorder.stop();
       $modalOkBtn.classList.remove("nope"); 
+      $loader.classList.add("hidden");
 
       $modalOkBtn.addEventListener("click", this.okbutton);
 
@@ -337,6 +442,9 @@ export default class Modal {
       $modalRecBtn.classList.add("focused");
       document.querySelector('.modal-content__timestamp').textContent = Date.now();
       this.mediaRecorder.start();
+      $loader.classList.remove("hidden");
+      $modalAudio.classList.add("hidden");
+
     }
     
   }
