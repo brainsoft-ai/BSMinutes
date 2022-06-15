@@ -52,12 +52,12 @@ def sync_audio(wav1, time1, wav2, time2, sr):
 
     if time1 > time2:
         tdiff = time1 - time2
-        diff = sr * tdiff // 1000000
+        diff = sr * tdiff // 1000
         new_wav1 = wav1
         new_wav2 = wav2[...,diff:]
     else:
         tdiff = time2 - time1
-        diff = sr * tdiff // 1000000
+        diff = sr * tdiff // 1000
         new_wav1 = wav1[...,diff:]
         new_wav2 = wav2
 
@@ -299,7 +299,7 @@ def static_file(path):
 
 @app.route('/get_time', methods=['GET'])
 def server_time():
-    return str(int(datetime.datetime.now().timestamp()*1000))
+    return str(int(datetime.datetime.now().timestamp()))
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
