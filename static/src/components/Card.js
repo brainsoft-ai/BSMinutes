@@ -325,7 +325,7 @@ export default class Card {
             $resultText.textContent = "작업 중입니다."
           }
           else{
-            await fetch('https://'+ip+'/result/'+sessionid.padStart(5,'0')+'/stt_result.json')
+            fetch('https://'+ip+'/result/'+sessionid.padStart(5,'0')+'/stt_result.json')
               .then(Response => Response.json())
               .then(data => {
                   let results = [];
