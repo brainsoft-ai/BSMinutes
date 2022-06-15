@@ -163,28 +163,32 @@ class DJS():
 
     def get_config(self):
         return self._config
-        
-    def get_sin_spectrogram(self):
-        return self._sin_spec.clone().detach()
 
-    def get_cos_spectrogram(self):
-        return self._cos_spec.clone().detach()
-        
-    def get_amplitude_spectrogram(self):
+    def get_sin_spectrogram(self, fslice=slice(None, None), tslice=slice(None, None)):
+        spec = self._sin_spec[..., fslice, tslice].clone().detach()
+        return spec
+
+    def get_cos_spectrogram(self, fslice=slice(None, None), tslice=slice(None, None)):
+        spec = self._cos_spec[..., fslice, tslice].clone().detach()
+        return spec
+
+    def get_amplitude_spectrogram(self, fslice=slice(None, None), tslice=slice(None, None)):
         if self._sin_spec == None or self._cos_spec == None:
             return None
         
         if self._amp_spec == None:
             self._amp_spec = torch.sqrt(torch.square(self._sin_spec) + torch.square(self._cos_spec))
-        return self._amp_spec.clone().detach()
+        spec = self._amp_spec[..., fslice, tslice].clone().detach()
+        return spec
 
-    def get_phase_spectrogram(self):
+    def get_phase_spectrogram(self, fslice=slice(None, None), tslice=slice(None, None)):
         if self._sin_spec == None or self._cos_spec == None:
             return None
         
         if self._pha_spec == None:
-            self._pha_spec = torch.atan2(self._sin_spec, self._cos_spec)
-        return self._pha_spec.clone().detach()
+            self._pha_spec = torch.sqrt(torch.square(self._sin_spec) + torch.square(self._cos_spec))
+        spec = self._pha_spec[..., fslice, tslice].clone().detach()
+        return spec
 
     def getSpectrograms(self):
         return self.get_sin_spectrogram(), self.get_cos_spectrogram(), self.get_amplitude_spectrogram(), self.get_phase_spectrogram()
@@ -196,7 +200,7 @@ class DJS():
         return self._config.num_freqs
 
 def loadDJS(djs_path):
-    djs = DJS(djs_path)
+    djs = DJS(file_path=djs_path)
     return djs
 
 def saveDJS(djs_path, sin_spec, cos_spec, configuration):

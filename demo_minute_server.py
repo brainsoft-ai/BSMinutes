@@ -14,6 +14,7 @@ from djs.djs import DJS
 from djs.djt import DJT
 
 from clovaspeechclient import ClovaSpeechClient
+from fix_word_overlap import remove_residual_words
 
 RESULT_FOLDER = './results/'
 RESULT_FILE = 'result.zip'
@@ -135,24 +136,34 @@ def get_ClovaSpeechSR(file, lang):
     res = ClovaSpeechClient().req_upload(file=file, completion='sync') #diarization test necessary??
     return res
 
-def get_stt(file, lang='ko', stt_engine='naver'):
+def get_stt_segments(file, lang='ko', stt_engine='naver'):
     if stt_engine.lower() == 'naver':
         #res = naver_transcribe_file(file, lang)
         res = get_ClovaSpeechSR(file, lang)
         json_data = json.loads(res.text)
+
         if 'segments' in json_data:
-            segment_data = []
-            for segment in json_data['segments']:
-                text_data = {}
-                text_data['start'] = segment['start']
-                text_data['end'] = segment['end']
-                text_data['text'] = segment['text']
-                segment_data.append(text_data)
-            return segment_data
-        elif 'text' in json_data:
-            return json_data['text']
+            return json_data['segments']
         else:
-            return json_data['message']
+            return "Error" 
+
+        # json_path = f"./results/stt_result{datetime.datetime.now()}.json"
+        # with open(json_path, 'w') as outfile:
+        #     json.dump(json_data, outfile, indent=4)
+
+        # if 'segments' in json_data:
+        #     segment_data = []
+        #     for segment in json_data['segments']:
+        #         text_data = {}
+        #         text_data['start'] = segment['start']
+        #         text_data['end'] = segment['end']
+        #         text_data['text'] = segment['text']
+        #         segment_data.append(text_data)
+        #     return segment_data
+        # elif 'text' in json_data:
+        #     return json_data['text']
+        # else:
+        #     return json_data['message']
     elif stt_engine.lower() == 'google':
         return "Not supported yet"
     else:
@@ -244,12 +255,10 @@ def process_data(sessionid):
 
     # get djs and do find_max
     wav = wav.T.to('cuda')
-    #djt_mix = DJT(sample_rate=sr, channels=2) # mix audio channel is always 2
     djs = djt_mix.wav2djs(wav)
     djs1, djs2 = find_max(djs)
 
     # save processed djs to wav
-    #djt_inv = DJT(sample_rate=sr, channels=1)
     file_out1 = f"{user1}.wav"
     new_path1 = f"{session_dir}{file_out1}"
     wav1 = djt_inv.djs2wav(djs1, save=True, wav_path=new_path1)
@@ -260,8 +269,9 @@ def process_data(sessionid):
 
     # get stt and save them
     stt_result = {}
-    stt_result[user1] = get_stt(new_path1)
-    stt_result[user2] = get_stt(new_path2)
+    stt_segments1 = get_stt_segments(new_path1)
+    stt_segments2 = get_stt_segments(new_path2)
+    stt_result[user1], stt_result[user2] = remove_residual_words(stt_segments1, djs1, stt_segments2, djs2)
 
     stt_result_path = f"{session_dir}stt_result.json"
     with open(stt_result_path, 'w') as outfile:
