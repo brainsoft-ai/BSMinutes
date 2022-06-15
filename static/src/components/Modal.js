@@ -440,7 +440,7 @@ export default class Modal {
     }
     else{
       $modalRecBtn.classList.add("focused");
-      fetch('https://'+ip+'/get_time').then(response =>{
+      await fetch('https://'+ip+'/get_time').then(response =>{
         document.querySelector('.modal-content__timestamp').textContent = response;
       })
       this.mediaRecorder.start();
