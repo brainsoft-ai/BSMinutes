@@ -557,6 +557,10 @@ body {
   display: none;
 }
 
+.modal-content__timewatch.hidden {
+  display: none;
+}
+
 .modal-content__timestamp.hidden {
   display: none;
 }
@@ -748,7 +752,7 @@ body {
 }
 
 .result-content__audio {
-  width: 300px;
+  width: 90%;
   height: 50px;
   display: flex;
   justify-content: center;

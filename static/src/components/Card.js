@@ -320,9 +320,9 @@ export default class Card {
           }),
         })
         .then((response)=>(response.json()))
-        .then((result) => {
+        .then( async (result) => {
           if(result["result"] == "processing"){
-            $resultText.textContent = "작업 중입니다."
+            $resultText.textContent = "\t 결과를 받아오는 중입니다."
           }
           else{
             fetch('https://'+ip+'/result/'+sessionid.padStart(5,'0')+'/stt_result.json')
@@ -361,6 +361,7 @@ export default class Card {
                   $resultAudio.controls = true;
                   $resultAudio.id = item;
                   $resultAudio.src = 'https://'+ip+'/result/'+sessionid.padStart(5,'0')+'/'+item+'.wav';
+                  $resultAudio.async = true;
                   $resultContainer.insertBefore($resultAudio, $resultText);
                 })
                 keys.unshift($modalAudio.id);

@@ -146,6 +146,9 @@ export default class Modal {
         begin="0.9s"/>    
     </rect>
   </svg>`;
+    const $timewatch = document.createElement("div");
+    $timewatch.className = "modal-content__timewatch hidden";
+    $timewatch.innerText = "00 : 00"
 
     const $modalTimestamp = document.createElement("div");
     $modalTimestamp.className = "modal-content__timestamp hidden";
@@ -165,6 +168,7 @@ export default class Modal {
     $modalContent.appendChild($modalText);
     $modalContent.appendChild($modalHTML);
     $modalContent.appendChild($modalAudio);
+    $loader.appendChild($timewatch);
     $modalContent.appendChild($loader);
     $modalContent.appendChild($modalTimestamp);
     $modalRec.appendChild($modalRecBtn);
@@ -394,6 +398,10 @@ export default class Modal {
       ".modal-content__loader"
     );
 
+    const $timewatch = this.$modalContainer.querySelector(
+      ".modal-content__timewatch"
+    );
+
     const $modalRec = this.$modalContainer.querySelector(
       ".modal-content__rec"
     );
@@ -418,6 +426,11 @@ export default class Modal {
           if (event.data.size > 0) this.recordedChunks.push(event.data); // 오디오 데이터가 취득될 때마다 배열에 담아둔다.
         }
         this.mediaRecorder.onstop = ()=>{
+          fetch('https://'+ip+'/get_time')
+          .then(response => response.text())
+          .then(result => {
+            document.querySelector('.modal-content__timestamp').textContent = result;
+          })
           $modalAudio.setAttribute('controls', ''); // add controls
           this.audioBlob = new Blob(this.recordedChunks, { type: 'audio/mp3' });
           const audioURL = window.URL.createObjectURL(this.audioBlob);
@@ -434,21 +447,30 @@ export default class Modal {
       this.mediaRecorder.stop();
       $modalOkBtn.classList.remove("nope"); 
       $loader.classList.add("hidden");
+      $timewatch.classList.add("hidden");
 
       $modalOkBtn.addEventListener("click", this.okbutton);
 
     }
     else{
+      
       $modalRecBtn.classList.add("focused");
-      fetch('https://'+ip+'/get_time')
-      .then(response => response.text())
-      .then(result => {
-        document.querySelector('.modal-content__timestamp').textContent = result;
-      })
       this.mediaRecorder.start();
       $loader.classList.remove("hidden");
+      $timewatch.classList.remove("hidden");
+      let seconds = 0;
+      function getTime(){
+        seconds = seconds + 1;
+        let minutes = parseInt(seconds / 60);
+        if(minutes>=1){
+          $modalRec.click();
+          seconds = seconds - 60;
+        }
+        $timewatch.innerText = `${minutes<10 ? `0${minutes}`:minutes} : ${seconds<10 ? `0${seconds}`:seconds}`;
+      }
+      setInterval(getTime, 1000);
+      
       $modalAudio.classList.add("hidden");
-
     }
     
   }

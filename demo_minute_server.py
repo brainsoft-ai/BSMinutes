@@ -49,18 +49,43 @@ def convert_webm2wav(file_in, file_out):
 
 
 def sync_audio(wav1, time1, wav2, time2, sr):
+    if time1 > time2:
+        tdiff = time1 - time2
+        diff = sr * tdiff // 1000
+        if diff + len(wav2[0]) < len(wav1[0]):
+            new_wav1 = wav1[..., -diff - len(wav2[0]) + len(wav1[0]):-diff]
+            new_wav2 = wav2
+        else:
+            new_wav1 = wav1[...,:-diff]
+            new_wav2 = wav2[...,diff + len(wav2[0]) - len(wav1[0]):]
 
+
+    else:
+        tdiff = time2 - time1
+        diff = sr * 3 * tdiff // 1000
+        print("here")
+        print(diff , len(wav1[0]) , len(wav2[0]))
+        print(diff + len(wav1[0]) - len(wav2[0]))
+        if diff + len(wav1[0]) < len(wav2[0]):
+            new_wav1 = wav1
+            new_wav2 = wav2[:, - diff - len(wav1[0]) + len(wav2[0]):-diff]
+        else:
+            new_wav1 = wav1[:, diff + len(wav1[0]) - len(wav2[0]):]
+            new_wav2 = wav2[:, :-diff]
+        print(new_wav1.shape, new_wav2.shape)
+    '''
     if time1 > time2:
         tdiff = time1 - time2
         diff = sr * tdiff // 1000
         new_wav1 = wav1
         new_wav2 = wav2[...,diff:]
+
     else:
         tdiff = time2 - time1
         diff = sr * tdiff // 1000
         new_wav1 = wav1[...,diff:]
         new_wav2 = wav2
-
+    '''
     len1 = new_wav1.shape[1]
     len2 = new_wav2.shape[1]
 
@@ -299,7 +324,9 @@ def static_file(path):
 
 @app.route('/get_time', methods=['GET'])
 def server_time():
-    return str(int(datetime.datetime.now().timestamp()))
+    a = int(datetime.datetime.utcnow().timestamp()*1000)
+    print(a)
+    return str(a)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
