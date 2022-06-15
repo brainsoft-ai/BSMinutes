@@ -384,7 +384,7 @@ export default class Modal {
     }
   }
 
-  async record() {
+  record() {
 
     const $modalAudio = this.$modalContainer.querySelector(
       ".modal-content__audio"
@@ -440,8 +440,10 @@ export default class Modal {
     }
     else{
       $modalRecBtn.classList.add("focused");
-      await fetch('https://'+ip+'/get_time').then(response =>{
-        document.querySelector('.modal-content__timestamp').textContent = response;
+      fetch('https://'+ip+'/get_time')
+      .then(response => response.text())
+      .then(result => {
+        document.querySelector('.modal-content__timestamp').textContent = result;
       })
       this.mediaRecorder.start();
       $loader.classList.remove("hidden");
