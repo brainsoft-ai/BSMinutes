@@ -52,12 +52,12 @@ def sync_audio(wav1, time1, wav2, time2, sr):
 
     if time1 > time2:
         tdiff = time1 - time2
-        diff = sr * tdiff // 1000
+        diff = sr * tdiff // 1
         new_wav1 = wav1
         new_wav2 = wav2[...,diff:]
     else:
         tdiff = time2 - time1
-        diff = sr * tdiff // 1000
+        diff = sr * tdiff // 1
         new_wav1 = wav1[...,diff:]
         new_wav2 = wav2
 
