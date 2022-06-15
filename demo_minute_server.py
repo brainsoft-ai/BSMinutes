@@ -396,7 +396,7 @@ if __name__ == "__main__":
         files = os.listdir(UPLOAD_FOLDER)
         for file in files:
             path = os.path.join(UPLOAD_FOLDER, file)
-            shutil.rmtree(path)    
+            os.remove(path)
 
     if not isdir(RESULT_FOLDER):
         os.mkdir(RESULT_FOLDER)
