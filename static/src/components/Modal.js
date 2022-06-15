@@ -440,7 +440,9 @@ export default class Modal {
     }
     else{
       $modalRecBtn.classList.add("focused");
-      document.querySelector('.modal-content__timestamp').textContent = Date.now();
+      fetch('https://'+ip+'/get_time').then(response =>{
+        document.querySelector('.modal-content__timestamp').textContent = response;
+      })
       this.mediaRecorder.start();
       $loader.classList.remove("hidden");
       $modalAudio.classList.add("hidden");

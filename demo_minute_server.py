@@ -9,6 +9,7 @@ import json, requests
 import torch, torchaudio
 from torch.nn.functional import pad
 import zipfile
+import datetime
 
 from djs.djs import DJS
 from djs.djt import DJT
@@ -284,6 +285,10 @@ def allowed_file(filename):
 @app.route('/result/<path:path>')
 def static_file(path):
     return send_from_directory(app.config['RESULT_FOLDER'], path)
+
+@app.route('/get_time', methods=['GET'])
+def server_time(path):
+    return int(datetime.datetime.now().timestamp())
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
