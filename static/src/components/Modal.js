@@ -12,11 +12,13 @@ export default class Modal {
     this.ok = this.ok.bind(this);
     this.okbutton = this.okbutton.bind(this);
     
+    this.timer;
     this.recordedChunks = []; // will be used later to record audio
     this.mediaRecorder = null; // will be used later to record audio
     this.audioBlob = null; // the blob that will hold the recorded audio
     this.onContinue = null;
     this.stream = null;
+    this.timestamp = false;
   }
 
   createModal() {
@@ -418,19 +420,25 @@ export default class Modal {
         {
             type: "audio",
             mimeType: mime,
+            sampleRate: 16000,
             audioBitsPerSecond: 128000,
         };
         this.mediaRecorder = new MediaRecorder(this.stream, options);
         
+
         this.mediaRecorder.ondataavailable = (event)=>{
           if (event.data.size > 0) this.recordedChunks.push(event.data); // 오디오 데이터가 취득될 때마다 배열에 담아둔다.
+          if(this.timestamp == false){
+            fetch('https://'+ip+'/get_time')
+            .then(response => response.text())
+            .then(result => {
+              document.querySelector('.modal-content__timestamp').textContent = result;
+            })
+            this.timestamp = true;
+          }
         }
+
         this.mediaRecorder.onstop = ()=>{
-          fetch('https://'+ip+'/get_time')
-          .then(response => response.text())
-          .then(result => {
-            document.querySelector('.modal-content__timestamp').textContent = result;
-          })
           $modalAudio.setAttribute('controls', ''); // add controls
           this.audioBlob = new Blob(this.recordedChunks, { type: 'audio/mp3' });
           const audioURL = window.URL.createObjectURL(this.audioBlob);
@@ -440,17 +448,19 @@ export default class Modal {
           //$modal.insertBefore(audioElm, $modalRec);
         }
     }
-  
+    
     const $modalRecBtn = $modalRec.querySelector(".modal-content__recbtn");
     if($modalRecBtn.classList.contains("focused")){
       $modalRecBtn.classList.remove("focused");
+      this.timestamp = false;
       this.mediaRecorder.stop();
       $modalOkBtn.classList.remove("nope"); 
       $loader.classList.add("hidden");
       $timewatch.classList.add("hidden");
 
       $modalOkBtn.addEventListener("click", this.okbutton);
-
+      clearInterval(this.timer);
+      $timewatch.innerText = `00 : 00`;
     }
     else{
       
@@ -458,17 +468,14 @@ export default class Modal {
       this.mediaRecorder.start();
       $loader.classList.remove("hidden");
       $timewatch.classList.remove("hidden");
-      let seconds = 0;
-      function getTime(){
+      $timewatch.innerText = `00 : 00`;
+
+      this.timer = setInterval(function(){
+        let seconds = parseInt($timewatch.innerText.slice(5));
         seconds = seconds + 1;
         let minutes = parseInt(seconds / 60);
-        if(minutes>=1){
-          $modalRec.click();
-          seconds = seconds - 60;
-        }
         $timewatch.innerText = `${minutes<10 ? `0${minutes}`:minutes} : ${seconds<10 ? `0${seconds}`:seconds}`;
-      }
-      setInterval(getTime, 1000);
+      }, 1000);
       
       $modalAudio.classList.add("hidden");
     }

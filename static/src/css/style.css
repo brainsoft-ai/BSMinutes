@@ -557,6 +557,12 @@ body {
   display: none;
 }
 
+.modal-content__timewatch {
+  text-align: center;
+  font-weight: 900;
+  color: rgba(255,255,255,0.9);
+}
+
 .modal-content__timewatch.hidden {
   display: none;
 }
@@ -734,7 +740,10 @@ body {
 
 
 .result-text {
-  margin-top: 30px;
+  margin-top: 60px;
+  overflow-y: scroll;
+  max-height: calc(100% - 200px);
+  border-bottom: solid 1px #1e1d33;
 }
 
 .result-user-container {
@@ -752,7 +761,11 @@ body {
 }
 
 .result-content__audio {
-  width: 90%;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 160px;
+  width: 300px;
   height: 50px;
   display: flex;
   justify-content: center;

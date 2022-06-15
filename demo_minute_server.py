@@ -63,16 +63,26 @@ def sync_audio(wav1, time1, wav2, time2, sr):
     else:
         tdiff = time2 - time1
         diff = (sr // 1000) * tdiff
-        print("here")
-        print(diff , len(wav1[0]) , len(wav2[0]))
-        print(diff + len(wav1[0]) - len(wav2[0]))
         if diff + len(wav1[0]) < len(wav2[0]):
             new_wav1 = wav1
-            new_wav2 = wav2[:, - diff - len(wav1[0]) + len(wav2[0]):-diff]
+            new_wav2 = wav2[:, - diff - len(wav1[0]) + len(wav2[0]):]
         else:
             new_wav1 = wav1[:, diff + len(wav1[0]) - len(wav2[0]):]
-            new_wav2 = wav2[:, :-diff]
-        print(new_wav1.shape, new_wav2.shape)
+            new_wav2 = wav2
+    '''
+    if time1 > time2:
+        tdiff = time1 - time2
+        diff = sr * tdiff // 1000
+        new_wav1 = wav1
+        new_wav2 = wav2[:,diff:]
+
+    else:
+        tdiff = time2 - time1
+        diff = sr * tdiff // 1000
+        new_wav1 = wav1[:,diff:]
+        new_wav2 = wav2
+
+    '''
     '''
     if time1 > time2:
         tdiff = time1 - time2
@@ -252,6 +262,7 @@ def process_data(sessionid):
     user1 = uploaded_data[0][0]
     time1 = int(uploaded_data[0][1])
     file1 = uploaded_data[0][2]
+    device1 = uploaded_data[0][3]
     filepath1 = f"{UPLOAD_FOLDER}{file1}"
     file_out1 = f"{user1}_{time1}.wav"
     filepath_out1 = f"{UPLOAD_FOLDER}{file_out1}"
@@ -263,6 +274,7 @@ def process_data(sessionid):
     user2 = uploaded_data[1][0]
     time2 = int(uploaded_data[1][1])
     file2 = uploaded_data[1][2]
+    device2 = uploaded_data[1][3]
     filepath2 = f"{UPLOAD_FOLDER}{file2}"
     file_out2 = f"{user2}_{time2}.wav"
     filepath_out2 = f"{UPLOAD_FOLDER}{file_out2}"
@@ -270,7 +282,20 @@ def process_data(sessionid):
     wav2, sr2 = torchaudio.load(filepath_out2)
     wav2, sr2 = resample_audio(wav2, sr2, SAMPLE_RATE)
     ch2 = len(wav2)
-
+    '''
+    if(device1.find("998") != -1):
+        if(device2.find("750") != -1):
+            if time1 > time2:
+                time2 += 200
+            else:
+                time1 += 500
+    else:
+        if(device2.find("998") != -1):
+            if time1 > time2:
+                time2 += 100
+            else:
+                time2 += 400
+    '''
     assert(sr1 == sr2 and ch1 == ch2)
     sr = sr1
     ch = ch1
@@ -318,7 +343,7 @@ def index():
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
+           
 @app.route('/result/<path:path>')
 def static_file(path):
     return send_from_directory(app.config['RESULT_FOLDER'], path)
@@ -335,6 +360,9 @@ def upload_file():
         body = json.loads(request.form['body'])
         userid = body['id']
         timestamp = body['timestamp']
+
+        device = request.headers.get('User-Agent')
+        device = device[device.find("SM"):device.find("SM")+5]
 
         # check if the post request has the file part
         if 'audio' not in request.files:
@@ -361,13 +389,13 @@ def upload_file():
         upload_count = len(uploaded_data)
         if upload_count == 0:
             sessionid += 1
-            uploaded_data.append((userid, timestamp, filename))
+            uploaded_data.append((userid, timestamp, filename, device))
         elif upload_count == 1:
             # ignore if the userid is same as before
             if userid == uploaded_data[0][0]:
                 pass
             else:
-                uploaded_data.append((userid, timestamp, filename))
+                uploaded_data.append((userid, timestamp, filename, device))
 
                 t = threading.Thread(target=process_data, args=(sessionid,))
                 t.start()

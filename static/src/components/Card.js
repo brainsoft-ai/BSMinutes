@@ -322,7 +322,7 @@ export default class Card {
         .then((response)=>(response.json()))
         .then( async (result) => {
           if(result["result"] == "processing"){
-            $resultText.textContent = "\t 결과를 받아오는 중입니다."
+            $resultText.innerHTML = "<div style='margin-left:15px;'>결과를 받아오는 중입니다.</div>"
           }
           else{
             fetch('https://'+ip+'/result/'+sessionid.padStart(5,'0')+'/stt_result.json')
