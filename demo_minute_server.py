@@ -299,7 +299,7 @@ def static_file(path):
 
 @app.route('/get_time', methods=['GET'])
 def server_time():
-    return str(int(datetime.datetime.now().timestamp()*100))
+    return str(int(datetime.datetime.now().timestamp()*1000))
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
