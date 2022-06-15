@@ -297,8 +297,8 @@ def static_file(path):
     return send_from_directory(app.config['RESULT_FOLDER'], path)
 
 @app.route('/get_time', methods=['GET'])
-def server_time(path):
-    return int(datetime.datetime.now().timestamp())
+def server_time():
+    return str(int(datetime.datetime.now().timestamp()))
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
