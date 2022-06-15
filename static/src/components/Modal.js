@@ -384,7 +384,7 @@ export default class Modal {
     }
   }
 
-  record() {
+  async record() {
 
     const $modalAudio = this.$modalContainer.querySelector(
       ".modal-content__audio"
