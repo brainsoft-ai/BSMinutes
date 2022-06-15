@@ -1,6 +1,6 @@
 import { UserStorage, LangStorage } from "../utils/CustomStorage.js";
 
-const ip = "10.10.25.184:443";
+const ip = "61.97.244.70:443";
 
 export default class Modal {
   constructor({ $target }) {

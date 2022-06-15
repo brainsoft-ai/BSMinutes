@@ -5,7 +5,7 @@ import {
 } from "../utils/CustomStorage.js";
 import { Hash } from "../utils/Hash.js";
 
-const ip = "10.10.25.184:443";
+const ip = "61.97.244.70:443";
 
 function convertTime(milliSecond) {
   const hour = String(Math.floor((milliSecond/ (1000 * 60 *60 )) % 24 )).padStart(2, "0"); // 시
