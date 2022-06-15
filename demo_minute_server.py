@@ -391,9 +391,19 @@ def check_session_complete():
 if __name__ == "__main__":
     if not isdir(UPLOAD_FOLDER):
         os.mkdir(UPLOAD_FOLDER)
+    else:
+        files = os.listdir(UPLOAD_FOLDER)
+        for file in files:
+            path = os.path.join(UPLOAD_FOLDER, file)
+            os.remove(path)
 
     if not isdir(RESULT_FOLDER):
         os.mkdir(RESULT_FOLDER)
+    else:
+        files = os.listdir(RESULT_FOLDER)
+        for file in files:
+            path = os.path.join(RESULT_FOLDER, file)
+            os.remove(path)        
 
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
     ssl_context.load_cert_chain(certfile='ssl/cert.pem', keyfile='ssl/key.pem', password='louie')
