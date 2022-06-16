@@ -87,6 +87,15 @@ def remove_overlapping_words(overlapping_wordlist, stt_segments1, djs1, stt_segm
             stt_segments1 = remove_word_from_segments(wordpair[0], stt_segments1)
         else:
             pass
+        print(stt_segments1)
+        for segment in stt_segments1:
+            if segment['text'] == "":
+                stt_segments1.remove(segment)
+        print(stt_segments1)
+
+        for segment in stt_segments2:
+            if segment['text'] == "":
+                stt_segments2.remove(segment)
 
     return stt_segments1, stt_segments2
 
