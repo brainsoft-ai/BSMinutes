@@ -15,6 +15,8 @@ import datetime
 from djs.djs import DJS
 from djs.djt import DJT
 
+from syncstart import file_offset
+
 from clovaspeechclient import ClovaSpeechClient
 from fix_word_overlap import remove_residual_words
 
