@@ -107,6 +107,32 @@ def sync_audio(wav1, time1, wav2, time2, sr):
         new_wav1 = pad(new_wav1, (0, ldiff), 'constant', 0.0)
     return new_wav1, new_wav2
 
+def sync_audio2(wavpath1, wavpath2):
+    wav1, sr1 = torchaudio.load(wavpath1)
+    wav2, sr2 = torchaudio.load(wavpath2)
+
+    wav1, _ = resample_audio(wav1, sr1, SAMPLE_RATE)
+    wav2, _ = resample_audio(wav2, sr2, SAMPLE_RATE)
+    sr = SAMPLE_RATE
+
+    file_to_cut, offset = file_offset(in1=wavpath1, in2=wavpath2, take=4, show=False)
+
+    if file_to_cut == wavpath1:
+        wav1 = wav1[..., int(offset*sr):]
+    else:
+        wav2 = wav2[..., int(offset*sr):]
+
+    len1 = wav1.shape[1]
+    len2 = wav2.shape[1]
+    if len1 > len2:
+        ldiff = len1 - len2
+        wav2 = pad(wav2, (0, ldiff), 'constant', 0.0)
+    else:
+        ldiff = len2 - len1
+        wav1 = pad(wav1, (0, ldiff), 'constant', 0.0)
+
+    return wav1, wav2, sr
+
 def mix_mono2stereo(wav_data1, ratio1_l, ratio1_r, wav_data2, ratio2_l, ratio2_r):
     wav_data_l = wav_data1 * ratio1_l + wav_data2 * ratio2_l
     wav_data_r = wav_data1 * ratio1_r + wav_data2 * ratio2_r
@@ -301,7 +327,8 @@ def process_data(sessionid):
     ch = ch1
 
     # sync and mix audio files
-    wav1, wav2 = sync_audio(wav1, time1, wav2, time2, sr)
+    #wav1, wav2 = sync_audio(wav1, time1, wav2, time2, sr)
+    wav1, wav2, sr = sync_audio2(filepath_out1, filepath_out2)
     wav = mix_mono2stereo(wav1, 1.0, 0.0, wav2, 0.0, 1.0)
     mix_path = os.path.join(session_dir, "mix.wav")
     torchaudio.save(mix_path, wav, sr)

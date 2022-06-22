@@ -1,6 +1,7 @@
 nohup.out
 .DS_Store
 test/*
+temp/*
 venv/*
 downloads/*
 results/*
