@@ -268,9 +268,9 @@ export default class Modal {
         if(!this.mediaRecorder){
           this.stream = await navigator.mediaDevices.getUserMedia({
             audio: {
-              echoCancellation: false,
+              //echoCancellation: false,
               noiseSuppression: false,
-              autoGainControl: false,
+              //autoGainControl: false,
             },
           })
         }
