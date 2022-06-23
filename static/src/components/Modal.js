@@ -267,7 +267,11 @@ export default class Modal {
             
         if(!this.mediaRecorder){
           this.stream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
+            audio: {
+              echoCancellation: false,
+              noiseSuppression: false,
+              //autoGainControl: false,
+            },
           })
         }
         $modalRec.addEventListener("click", this.record);
@@ -420,7 +424,6 @@ export default class Modal {
         {
             type: "audio",
             mimeType: mime,
-            sampleRate: 16000,
             audioBitsPerSecond: 128000,
         };
         this.mediaRecorder = new MediaRecorder(this.stream, options);
