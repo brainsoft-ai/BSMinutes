@@ -6,7 +6,7 @@ iE=1
 iT=2
 
 
-WORD_OVERLAP_TIME_THRESHOLD = 0.95 # 
+WORD_OVERLAP_TIME_THRESHOLD = 0.45 # 
 
 def check_time_overlap(s1, e1, s2, e2):
     if (s1-s2)*(e1-e2) > 0:
@@ -87,11 +87,10 @@ def remove_overlapping_words(overlapping_wordlist, stt_segments1, djs1, stt_segm
             stt_segments1 = remove_word_from_segments(wordpair[0], stt_segments1)
         else:
             pass
-        print(stt_segments1)
+
         for segment in stt_segments1:
             if segment['text'] == "":
                 stt_segments1.remove(segment)
-        print(stt_segments1)
 
         for segment in stt_segments2:
             if segment['text'] == "":
