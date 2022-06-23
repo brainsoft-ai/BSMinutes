@@ -270,7 +270,7 @@ export default class Modal {
             audio: {
               echoCancellation: false,
               noiseSuppression: false,
-              //autoGainControl: false,
+              autoGainControl: false,
             },
           })
         }
