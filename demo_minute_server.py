@@ -267,11 +267,13 @@ def zip_session_content(sessionid):
 
     os.rename(temp_zip, final_zip)
 
-def clear_download_data():
+def clear_download_data(del_files=True):
     uploaded_data.clear()
-    files = os.listdir(UPLOAD_FOLDER)
-    for file in files:
-        os.remove(f"{UPLOAD_FOLDER}{file}")
+
+    if del_files:
+        files = os.listdir(UPLOAD_FOLDER)
+        for file in files:
+            os.remove(f"{UPLOAD_FOLDER}{file}")
 
 def process_data(sessionid):
     global processingid
@@ -361,7 +363,7 @@ def process_data(sessionid):
 
     #zip_session_content(sessionid)
 
-    clear_download_data()
+    clear_download_data(del_files=False)
     processingid = 0
 
 @app.route('/')
