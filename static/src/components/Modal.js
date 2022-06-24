@@ -155,10 +155,26 @@ export default class Modal {
     const $modalTimestamp = document.createElement("div");
     $modalTimestamp.className = "modal-content__timestamp hidden";
 
-    const $modalUpload = document.createElement("input");
-    $modalUpload.type = "file";
-    $modalUpload.accept= "audio/*";
+    const $modalUpload = document.createElement("div");
     $modalUpload.className = "modal-content__upload";
+
+    const $modalFilename = document.createElement("input");
+    $modalFilename.value = "첨부파일이 없습니다";
+    $modalFilename.placeholder = "첨부파일이 없습니다";
+    $modalFilename.className = "modal-content__filename";
+
+    const $modalFileBtn = document.createElement("label");
+    $modalFileBtn.for = "file";
+    $modalFileBtn.className = "modal-content__filebtn";
+
+    const $modalFile = document.createElement("input");
+    $modalFile.type = "file";
+    $modalFile.accept= "audio/*";
+    $modalFile.id = "file";
+    $modalFile.className = "modal-content__file hidden";
+    $modalFile.addEventListener('change', (evt) => {
+      $modalFilename.value = evt.value;
+    })
 
     const $modalRec = document.createElement("button");
     $modalRec.className = "modal-content__rec hidden";
@@ -178,6 +194,9 @@ export default class Modal {
     $loader.appendChild($timewatch);
     $modalContent.appendChild($loader);
     $modalContent.appendChild($modalTimestamp);
+    $modalUpload.appendChild($modalFilename);
+    $modalUpload.appendChild($modalFileBtn);
+    $modalUpload.appendChild($modalFile);
     $modalContent.appendChild($modalUpload);
     $modalRec.appendChild($modalRecBtn);
     $modalContent.appendChild($modalRec);
