@@ -617,7 +617,7 @@ export default class Card {
       if (LangStorage.isEnglish()) {
         $cardCountdown.textContent = "None";
       } else {
-        $cardCountdown.textContent = "녹음 없음";
+        $cardCountdown.textContent = "파일 전송";
       }
     }
 
@@ -653,7 +653,7 @@ export default class Card {
       $editButton.className = "card-menu edit";
       $editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>';
       $editButton.title = "Edit";
-      $editButton.addEventListener("mousedown", editButtonEL.bind(this));
+      //$editButton.addEventListener("mousedown", editButtonEL.bind(this));
 
       const $deleteButton = document.createElement("button");
       $deleteButton.className = "card-menu delete";

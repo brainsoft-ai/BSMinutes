@@ -382,6 +382,7 @@ export default class Modal {
     $RecordBtn.outerHTML = $RecordBtn.outerHTML;
     */
   }
+  
   async uploadbutton() {
     const $modalFile = this.$modalContainer.querySelector(
       ".modal-content__file"
