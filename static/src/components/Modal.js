@@ -165,7 +165,8 @@ export default class Modal {
     $modalFilename.className = "modal-content__filename";
 
     const $modalFileBtn = document.createElement("label");
-    $modalFileBtn.for = "file";
+    $modalFileBtn.htmlFor = "file";
+    $modalFileBtn.textContent = "파일찾기"
     $modalFileBtn.className = "modal-content__filebtn";
 
     const $modalFile = document.createElement("input");
@@ -174,7 +175,7 @@ export default class Modal {
     $modalFile.id = "file";
     $modalFile.className = "modal-content__file hidden";
     $modalFile.addEventListener('change', () => {
-      $modalFilename.value = $modalFile.value;
+      $modalFilename.value = $modalFile.value.split("\\")[1];
     })
 
     const $modalRec = document.createElement("button");
@@ -196,8 +197,8 @@ export default class Modal {
     $modalContent.appendChild($loader);
     $modalContent.appendChild($modalTimestamp);
     $modalUpload.appendChild($modalFilename);
-    $modalUpload.appendChild($modalFile);
     $modalUpload.appendChild($modalFileBtn);
+    $modalUpload.appendChild($modalFile);
     $modalContent.appendChild($modalUpload);
     $modalRec.appendChild($modalRecBtn);
     $modalContent.appendChild($modalRec);

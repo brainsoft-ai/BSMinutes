@@ -57,7 +57,11 @@ body {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 220px;
+  bottom: 205px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 .modal-content__filename {
@@ -67,19 +71,21 @@ body {
   vertical-align: middle;
   border: 1px solid #dddddd;
   width: 78%;
-  color: #999999;
+  color: rgba(255,255,255,0.9);
   font-weight: 800;
 }
 
 .modal-content__filebtn {
-  display: inline-block;
-  padding: 10px 20px;
+  display: flex;
+  padding: 5px 15px;
+  align-items: center;
   color: rgba(255,255,255,0.9);
-  vertical-align: middle;
-  background-color: #999999;
+  background-color: #4b61cf;
   cursor: pointer;
   height: 40px;
-  margin-left: 10px;
+  border-radius: 25px;
+  font-weight: 800;
+  margin-top : 15px;
 }
 
 .modal-content__upload.hidden {
