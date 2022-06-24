@@ -509,6 +509,9 @@ export default class Modal {
         seconds = seconds + 1;
         let minutes = parseInt($timewatch.innerText.slice(0,2));
         minutes = minutes + parseInt(seconds / 60);
+        if(seconds>=60){
+          seconds = seconds - 60;
+        }
         $timewatch.innerText = `${minutes<10 ? `0${minutes}`:minutes} : ${seconds<10 ? `0${seconds}`:seconds}`;
       }, 1000);
       
