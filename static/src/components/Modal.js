@@ -161,6 +161,7 @@ export default class Modal {
     const $modalFilename = document.createElement("input");
     $modalFilename.value = "첨부파일이 없습니다";
     $modalFilename.placeholder = "첨부파일이 없습니다";
+    $modalFilename.disabled = true;
     $modalFilename.className = "modal-content__filename";
 
     const $modalFileBtn = document.createElement("label");
@@ -172,8 +173,8 @@ export default class Modal {
     $modalFile.accept= "audio/*";
     $modalFile.id = "file";
     $modalFile.className = "modal-content__file hidden";
-    $modalFile.addEventListener('change', (evt) => {
-      $modalFilename.value = evt.value;
+    $modalFile.addEventListener('change', () => {
+      $modalFilename.value = $modalFile.value;
     })
 
     const $modalRec = document.createElement("button");
@@ -195,8 +196,8 @@ export default class Modal {
     $modalContent.appendChild($loader);
     $modalContent.appendChild($modalTimestamp);
     $modalUpload.appendChild($modalFilename);
-    $modalUpload.appendChild($modalFileBtn);
     $modalUpload.appendChild($modalFile);
+    $modalUpload.appendChild($modalFileBtn);
     $modalContent.appendChild($modalUpload);
     $modalRec.appendChild($modalRecBtn);
     $modalContent.appendChild($modalRec);
