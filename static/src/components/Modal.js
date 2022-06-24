@@ -155,6 +155,11 @@ export default class Modal {
     const $modalTimestamp = document.createElement("div");
     $modalTimestamp.className = "modal-content__timestamp hidden";
 
+    const $modalUpload = document.createElement("input");
+    $modalUpload.type = "file";
+    $modalUpload.accept= "audio/*";
+    $modalUpload.className = "modal-content__upload";
+
     const $modalRec = document.createElement("button");
     $modalRec.className = "modal-content__rec hidden";
 
@@ -173,6 +178,7 @@ export default class Modal {
     $loader.appendChild($timewatch);
     $modalContent.appendChild($loader);
     $modalContent.appendChild($modalTimestamp);
+    $modalContent.appendChild($modalUpload);
     $modalRec.appendChild($modalRecBtn);
     $modalContent.appendChild($modalRec);
     $modalContent.appendChild($modalOkBtn);
@@ -257,6 +263,10 @@ export default class Modal {
         ".modal-content__rec"
       );
 
+      const $modalUpload = this.$modalContainer.querySelector(
+        ".modal-content__upload"
+      );
+
       const $modalOkBtn = this.$modalContainer.querySelector(
         ".modal-content__ok"
       );
@@ -264,7 +274,8 @@ export default class Modal {
       if(record){
         //Record
         $modalRec.classList.remove("hidden");
-            
+        $modalRec.classList.remove("hidden");
+
         if(!this.mediaRecorder){
           this.stream = await navigator.mediaDevices.getUserMedia({
             audio: {
@@ -279,6 +290,7 @@ export default class Modal {
       }
       else{
         //Logout
+        $modalUpload.classList.add("hidden");
         $modalRec.classList.add("hidden");
         $modalOkBtn.classList.remove("nope");
         $modalOkBtn.addEventListener("click", this.ok);
@@ -408,6 +420,10 @@ export default class Modal {
       ".modal-content__timewatch"
     );
 
+    const $modalUpload = this.$modalContainer.querySelector(
+      ".modal-content__upload"
+    );
+
     const $modalRec = this.$modalContainer.querySelector(
       ".modal-content__rec"
     );
@@ -452,6 +468,7 @@ export default class Modal {
         }
     }
     
+    $modalUpload.classList.add("hidden");
     const $modalRecBtn = $modalRec.querySelector(".modal-content__recbtn");
     if($modalRecBtn.classList.contains("focused")){
       $modalRecBtn.classList.remove("focused");

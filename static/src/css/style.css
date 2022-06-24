@@ -52,6 +52,17 @@ body {
   --color-start: #64bef3;
 }
 
+.modal-content__upload {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 190px;
+}
+
+.modal-content__upload.hidden {
+  display: none;
+}
+
 .modal-content__loader {
   position: fixed;
   left: 50%;
