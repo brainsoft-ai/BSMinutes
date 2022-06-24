@@ -413,14 +413,12 @@ export default class Modal {
         const $session = document.querySelector(".session-container");
         $session.textContent = result.sessionid;
 
-        $modalAudio.classList.add("hidden");
         const $filter = document.querySelector(".modal-content__ok");
         
         if (($filter && !$filter.matches(".nope")) || !$filter) { 
           this.onContinue();
           this.closeModal();
           $filter.classList.add("nope");
-          $modalRecBtn.classList.remove("focused");
         }
       });
     })
