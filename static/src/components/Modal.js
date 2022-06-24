@@ -396,7 +396,7 @@ export default class Modal {
     const formData = new FormData();
     fetch('https://'+ip+'/get_time')
     .then(response => response.text())
-    .then(result => {
+    .then(async(result) => {
       const temp = JSON.stringify({
         id: UserStorage.getUserData(),
         timestamp: result});
