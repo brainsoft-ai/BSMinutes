@@ -175,7 +175,7 @@ export default class Modal {
     $modalFile.id = "file";
     $modalFile.className = "modal-content__file hidden";
     $modalFile.addEventListener('change', () => {
-      $modalFilename.value = $modalFile.value.split("\\")[1];
+      $modalFilename.value = $modalFile.value.split("\\").reverse()[0];
     })
 
     const $modalRec = document.createElement("button");

@@ -80,12 +80,21 @@ body {
   padding: 5px 15px;
   align-items: center;
   color: rgba(255,255,255,0.9);
-  background-color: #4b61cf;
+  background-color: rgba(255,255,255,0.2);
   cursor: pointer;
   height: 40px;
   border-radius: 25px;
   font-weight: 800;
   margin-top : 15px;
+}
+
+.modal-content__filebtn:hover {
+  background-color: #4b61cf;
+}
+
+
+.modal-content__filebtn:focus {
+  background-color: #4b61cf;
 }
 
 .modal-content__upload.hidden {
