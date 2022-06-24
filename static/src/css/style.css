@@ -1477,7 +1477,7 @@ input[type="number"]::-webkit-outer-spin-button {
   top: 33px;
   left: -92px;
   opacity: 1;
-  box-shadow: 0 10px 10px #3859ff46;
+  box-shadow: 0 10px 10px #8888ff46;/*#3859ff46;*/
   transform: scale(1.1);
   transition-delay: 0.1s;
 }
