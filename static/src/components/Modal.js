@@ -11,6 +11,7 @@ export default class Modal {
     this.record = this.record.bind(this);
     this.ok = this.ok.bind(this);
     this.okbutton = this.okbutton.bind(this);
+    this.uploadbutton = this.uploadbutton.bind(this);
     
     this.timer;
     this.recordedChunks = []; // will be used later to record audio
@@ -176,6 +177,8 @@ export default class Modal {
     $modalFile.className = "modal-content__file hidden";
     $modalFile.addEventListener('change', () => {
       $modalFilename.value = $modalFile.value.split("\\").reverse()[0];
+      $modalOkBtn.classList.remove("nope"); 
+      $modalOkBtn.addEventListener("click", this.uploadbutton);
     })
 
     const $modalRec = document.createElement("button");
@@ -379,6 +382,50 @@ export default class Modal {
     $RecordBtn.outerHTML = $RecordBtn.outerHTML;
     */
   }
+  async uploadbutton() {
+    const $modalFile = this.$modalContainer.querySelector(
+      ".modal-content__file"
+    );
+
+    const $modalOkBtn = this.$modalContainer.querySelector(
+      ".modal-content__ok"
+    );
+
+    $modalOkBtn.removeEventListener("click", this.uploadbutton);
+
+    const formData = new FormData();
+    fetch('https://'+ip+'/get_time')
+    .then(response => response.text())
+    .then(result => {
+      const temp = JSON.stringify({
+        id: UserStorage.getUserData(),
+        timestamp: result});
+      
+      formData.append('body', temp);
+      formData.append('audio', $modalFile.files[0], $modalFile.files[0].name);
+        
+      await fetch('https://'+ip+'/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      .then((response) => response.json())
+      .then((result) => {
+        const $session = document.querySelector(".session-container");
+        $session.textContent = result.sessionid;
+
+        $modalAudio.classList.add("hidden");
+        const $filter = document.querySelector(".modal-content__ok");
+        
+        if (($filter && !$filter.matches(".nope")) || !$filter) { 
+          this.onContinue();
+          this.closeModal();
+          $filter.classList.add("nope");
+          $modalRecBtn.classList.remove("focused");
+        }
+      });
+    })
+  }
+    
   
   async okbutton() {
     
