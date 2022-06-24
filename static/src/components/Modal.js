@@ -327,6 +327,14 @@ export default class Modal {
       ".modal-content__audio"
     );
 
+    const $loader = $modalContainer.querySelector(
+      ".modal-content__loader"
+    );
+
+    const $modalUpload = $modalContainer.querySelector(
+      ".modal-content__upload"
+    );
+
     const $modalRec = $modalContainer.querySelector(
       ".modal-content__rec"
     );
@@ -336,6 +344,12 @@ export default class Modal {
     );
     
     $modalAudio.classList.add("hidden");
+    $modalUpload.classList.remove("hidden");
+    
+    if($loader.classList.contains('hidden') == false){
+      $modalRec.click();
+    }
+
     $modalRec.removeEventListener("click", this.record);
     $modalOkBtn.removeEventListener("click", this.ok);
     
@@ -493,7 +507,8 @@ export default class Modal {
       this.timer = setInterval(function(){
         let seconds = parseInt($timewatch.innerText.slice(5));
         seconds = seconds + 1;
-        let minutes = parseInt(seconds / 60);
+        let minutes = parseInt($timewatch.innerText.slice(0,2));
+        minutes = minutes + parseInt(seconds / 60);
         $timewatch.innerText = `${minutes<10 ? `0${minutes}`:minutes} : ${seconds<10 ? `0${seconds}`:seconds}`;
       }, 1000);
       
