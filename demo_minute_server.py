@@ -1,4 +1,4 @@
-import os
+import os, sys
 from os.path import isdir
 import shutil
 import ssl
@@ -455,6 +455,23 @@ def show_result():
         except FileNotFoundError:
             abort(404)
 
+@app.route('/upload_onephone', methods=['POST'])
+def upload_onephone():
+    print("reached at upload_onephone", file=sys.stderr)
+    if request.method == 'POST':
+        if 'file' in request.files:
+            blob = request.files['file'].read()
+            size = len(blob)
+            dtype = "formdata file"
+        else:
+            size = len(request.data)
+            dtype = "binary file"
+        print(f"received file size is {size}", file=sys.stderr)
+    return jsonify(
+    result = 'OK',
+    filesize = size,
+    datatype = dtype
+)
 
 @app.route('/check_session_complete', methods=['POST'])
 def check_session_complete():
