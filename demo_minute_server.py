@@ -254,8 +254,8 @@ def get_sessiondir(sessionid):
 
 def zip_session_content(sessionid):
     session_dir = get_sessiondir(sessionid)
-    temp_zip = f"{RESULT_FOLDER}result.zip"
-    final_zip = f"{session_dir}result.zip"
+    temp_zip = f"{RESULT_FOLDER}{RESULT_FILE}"
+    final_zip = f"{session_dir}{RESULT_FILE}"
 
     zipf = zipfile.ZipFile(temp_zip, 'w')
     
@@ -292,7 +292,6 @@ def process_data(sessionid):
     user1 = uploaded_data[0][0]
     time1 = int(uploaded_data[0][1])
     file1 = uploaded_data[0][2]
-    device1 = uploaded_data[0][3]
     filepath1 = f"{UPLOAD_FOLDER}{file1}"
     file_out1 = f"{user1}_{time1}.wav"
     filepath_out1 = f"{UPLOAD_FOLDER}{file_out1}"
@@ -304,7 +303,6 @@ def process_data(sessionid):
     user2 = uploaded_data[1][0]
     time2 = int(uploaded_data[1][1])
     file2 = uploaded_data[1][2]
-    device2 = uploaded_data[1][3]
     filepath2 = f"{UPLOAD_FOLDER}{file2}"
     file_out2 = f"{user2}_{time2}.wav"
     filepath_out2 = f"{UPLOAD_FOLDER}{file_out2}"
@@ -312,20 +310,7 @@ def process_data(sessionid):
     wav2, sr2 = torchaudio.load(filepath_out2)
     wav2, sr2 = resample_audio(wav2, sr2, SAMPLE_RATE)
     ch2 = len(wav2)
-    '''
-    if(device1.find("998") != -1):
-        if(device2.find("750") != -1):
-            if time1 > time2:
-                time2 += 200
-            else:
-                time1 += 500
-    else:
-        if(device2.find("998") != -1):
-            if time1 > time2:
-                time2 += 100
-            else:
-                time2 += 400
-    '''
+
     assert(sr1 == sr2 and ch1 == ch2)
     sr = sr1
     ch = ch1
@@ -361,7 +346,64 @@ def process_data(sessionid):
     with open(stt_result_path, 'w') as outfile:
         json.dump(stt_result, outfile, indent=4)
 
-    #zip_session_content(sessionid)
+    zip_session_content(sessionid)
+
+    clear_download_data(del_files=False)
+    processingid = 0
+
+def process_stereo(sessionid, userid, timestamp, filepath):
+    global processingid
+    processingid = sessionid
+
+    session_dir = get_sessiondir(sessionid)
+    if not isdir(session_dir):
+        os.mkdir(session_dir)
+    else:
+        #remove existing files
+        files = os.listdir(session_dir)
+        for file in files:
+            path = os.path.join(session_dir, file)
+            os.remove(path)
+
+    stereo_file = filepath
+    wav, sr = torchaudio.load(filepath)
+    wav, sr = resample_audio(wav, sr, SAMPLE_RATE)
+    ch = len(wav)
+
+    user1 = userid+"_L"
+    user2 = userid+"_R"
+
+    # sync and mix audio files
+    #wav1, wav2, sr = sync_audio2(filepath_out1, filepath_out2)
+    wav = mix_mono2stereo(wav1, 1.0, 0.0, wav2, 0.0, 1.0)
+    mix_path = os.path.join(session_dir, "mix.wav")
+    torchaudio.save(mix_path, wav, sr)
+
+    # get djs and do find_max
+    wav = wav.T.to('cuda')
+    djs = djt_mix.wav2djs(wav)
+    djs1, djs2 = find_max(djs)
+
+    # save processed djs to wav
+    file_out1 = f"{user1}.wav"
+    new_path1 = f"{session_dir}{file_out1}"
+    wav1 = djt_inv.djs2wav(djs1, save=True, wav_path=new_path1)
+    file_out2 = f"{user2}.wav"
+    new_path2 = f"{session_dir}{file_out2}"
+    wav2 = djt_inv.djs2wav(djs2, save=True, wav_path=new_path2)
+
+
+    # get stt and save them
+    stt_result = {}
+    stt_segments1 = get_stt_segments(new_path1)
+    stt_segments2 = get_stt_segments(new_path2)
+    stt_result[user1], stt_result[user2] = remove_residual_words(stt_segments1, djs1, stt_segments2, djs2)
+
+    stt_result_path = f"{session_dir}stt_result.json"
+    with open(stt_result_path, 'w') as outfile:
+        json.dump(stt_result, outfile, indent=4)
+
+    zip_session_content(sessionid)
 
     clear_download_data(del_files=False)
     processingid = 0
@@ -392,9 +434,6 @@ def upload_file():
         userid = body['id']
         timestamp = body['timestamp']
 
-        device = request.headers.get('User-Agent')
-        device = device[device.find("SM"):device.find("SM")+5]
-
         # check if the post request has the file part
         if 'audio' not in request.files:
             flash('No file part')
@@ -420,13 +459,13 @@ def upload_file():
         upload_count = len(uploaded_data)
         if upload_count == 0:
             sessionid += 1
-            uploaded_data.append((userid, timestamp, filename, device))
+            uploaded_data.append((userid, timestamp, filename))
         elif upload_count == 1:
             # ignore if the userid is same as before
             if userid == uploaded_data[0][0]:
                 pass
             else:
-                uploaded_data.append((userid, timestamp, filename, device))
+                uploaded_data.append((userid, timestamp, filename))
 
                 t = threading.Thread(target=process_data, args=(sessionid,))
                 t.start()
@@ -457,21 +496,69 @@ def show_result():
 
 @app.route('/upload_onephone', methods=['POST'])
 def upload_onephone():
-    print("reached at upload_onephone", file=sys.stderr)
     if request.method == 'POST':
-        if 'file' in request.files:
-            blob = request.files['file'].read()
-            size = len(blob)
-            dtype = "formdata file"
+        # need to check out file retrieve method when frontend is actually implemented
+        # if 'file' in request.files:
+        #     blob = request.files['file'].read()
+        #     size = len(blob)
+        #     dtype = "formdata file"
+        body = json.loads(request.form['body'])
+        userid = body['id']
+        timestamp = body['timestamp']
+
+        device = request.headers.get('User-Agent')
+        device = device[device.find("SM"):device.find("SM")+5]
+
+        # check if the post request has the file part
+        if 'audio' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['audio']
+
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(f"{userid}_{timestamp}.webm")
+            file.save(f"{UPLOAD_FOLDER}{filename}")
         else:
-            size = len(request.data)
-            dtype = "binary file"
-        print(f"received file size is {size}", file=sys.stderr)
+            flash('file type not supported')
+
+        global data_lock
+        global sessionid
+
+        data_lock.acquire()
+        sessionid += 1
+        uploaded_data.append((userid, timestamp, filename, device))
+
+        t = threading.Thread(target=process_stereo, args=(sessionid, userid, timestamp, filename))
+        t.start()
+        data_lock.release()
+
     return jsonify(
-    result = 'OK',
-    filesize = size,
-    datatype = dtype
-)
+        result = 'OK',
+        sessionid = sessionid
+    )
+
+    # if request.method == 'POST':
+    #     if 'file' in request.files:
+    #         blob = request.files['file'].read()
+    #         size = len(blob)
+    #         dtype = "formdata file"
+    #     else:
+    #         size = len(request.data)
+    #         dtype = "binary file"
+    
+    # global sessionid
+    # process_stereo()
+
+    # return jsonify(
+    #     result = 'OK',
+    #     sessionid = sessionid
+    # )  
 
 @app.route('/check_session_complete', methods=['POST'])
 def check_session_complete():
