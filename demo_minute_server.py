@@ -506,9 +506,6 @@ def upload_onephone():
         userid = body['id']
         timestamp = body['timestamp']
 
-        device = request.headers.get('User-Agent')
-        device = device[device.find("SM"):device.find("SM")+5]
-
         # check if the post request has the file part
         if 'audio' not in request.files:
             flash('No file part')
