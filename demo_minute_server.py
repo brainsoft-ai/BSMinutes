@@ -498,13 +498,36 @@ def show_result():
 def upload_onephone():
     if request.method == 'POST':
         # need to check out file retrieve method when frontend is actually implemented
-        # if 'file' in request.files:
-        #     blob = request.files['file'].read()
-        #     size = len(blob)
-        #     dtype = "formdata file"
-        body = json.loads(request.form['body'])
-        userid = body['id']
-        timestamp = body['timestamp']
+        file = ""
+        userid = ""
+        timestamp = 0
+        print('upload_onephone', file=sys.stderr)
+
+        if 'file' in request.files:
+            file = request.files['file']
+            print(f'upload_onephone: file = {file}', file=sys.stderr)
+            file.save(os.path.join(uploads_dir, secure_filename(profile.filename)))
+        else:
+            print('no file in POST data', file=sys.stderr)
+            flash('no file in POST data')
+            return redirect(request.url)
+        if 'id' in request.form:
+            userid = request.form['id']
+            print(f'upload_onephone: id = {userid}', file=sys.stderr)
+        else:
+            print('no user id in POST data', file=sys.stderr)
+            flash('no user id in POST data')
+            return redirect(request.url)
+        if 'timestamp' in request.form:
+            timestamp = request.form['timestamp']
+            print(f'upload_onephone: timestamp = {timestamp}', file=sys.stderr)
+        else:
+            print('no timestamp in POST data', file=sys.stderr)
+            flash('no timestamp in POST data')
+            return redirect(request.url)
+        # body = json.loads(request.form['body'])
+        # userid = body['id']
+        # timestamp = body['timestamp']
 
         # check if the post request has the file part
         if 'audio' not in request.files:
@@ -597,4 +620,6 @@ if __name__ == "__main__":
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
     ssl_context.load_cert_chain(certfile='ssl/cert.pem', keyfile='ssl/key.pem', password='louie')
 
+    app.config["SESSION_TYPE"] = "filesystem"
+    app.config["SECRET_KEY"] = "super sekret key"
     app.run(host="0.0.0.0", port=443, debug=True, threaded=True, ssl_context=ssl_context)
