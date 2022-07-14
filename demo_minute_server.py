@@ -506,7 +506,8 @@ def upload_onephone():
         if 'file' in request.files:
             file = request.files['file']
             print(f'upload_onephone: file = {file}', file=sys.stderr)
-            file.save(os.path.join(uploads_dir, secure_filename(profile.filename)))
+            filename = secure_filename(f"{userid}_{timestamp}_{file.filename}")
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
         else:
             print('no file in POST data', file=sys.stderr)
             flash('no file in POST data')
