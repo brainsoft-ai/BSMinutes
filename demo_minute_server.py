@@ -493,8 +493,7 @@ def show_result():
         try:
             return send_file(
                 result_file,
-                as_attachment=True,
-                attachment_filename=RESULT_FILE
+                as_attachment=True
             )
         except FileNotFoundError:
             abort(404)
