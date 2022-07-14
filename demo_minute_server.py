@@ -480,8 +480,13 @@ def upload_file():
 @app.route('/result', methods=['POST'])
 def show_result():
     if request.method == 'POST':
-        params = request.get_json()
-        sessionid = int(params['sessionid'])
+        if 'sessionid' in request.form:
+            sessionid = request.form['sessionid']
+            print(f'show_result: sessionid = {sessionid}', file=sys.stderr)
+        else:
+            print('no sessionid in POST data', file=sys.stderr)
+            flash('no sessionid in POST data')
+            return redirect(request.url)
 
         session_dir = get_sessiondir(sessionid)
         result_file = f"{session_dir}{RESULT_FILE}"
@@ -586,8 +591,8 @@ def check_session_complete():
             sessionid = request.form['sessionid']
             print(f'check_session_complete: sessionid = {sessionid}', file=sys.stderr)
         else:
-            print('no user id in POST data', file=sys.stderr)
-            flash('no user id in POST data')
+            print('no sessionid in POST data', file=sys.stderr)
+            flash('no sessionid in POST data')
             return redirect(request.url)
 
         global processingid
