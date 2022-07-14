@@ -498,16 +498,15 @@ def show_result():
 def upload_onephone():
     if request.method == 'POST':
         # need to check out file retrieve method when frontend is actually implemented
-        file = ""
+        filepath = ""
         userid = ""
         timestamp = 0
         print('upload_onephone', file=sys.stderr)
+        file = None
 
         if 'file' in request.files:
             file = request.files['file']
             print(f'upload_onephone: file = {file}', file=sys.stderr)
-            filename = secure_filename(f"{userid}_{timestamp}_{file.filename}")
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
         else:
             print('no file in POST data', file=sys.stderr)
             flash('no file in POST data')
@@ -526,15 +525,15 @@ def upload_onephone():
             print('no timestamp in POST data', file=sys.stderr)
             flash('no timestamp in POST data')
             return redirect(request.url)
-        # body = json.loads(request.form['body'])
-        # userid = body['id']
-        # timestamp = body['timestamp']
 
-        # check if the post request has the file part
-        if 'audio' not in request.files:
-            flash('No file part')
+        if file != None:
+            filename = secure_filename(f"{userid}_{timestamp}_{file.filename}")
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(filepath)
+        else:
+            print('no file in POST data', file=sys.stderr)
+            flash('no file in POST data')
             return redirect(request.url)
-        file = request.files['audio']
 
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
@@ -553,9 +552,7 @@ def upload_onephone():
 
         data_lock.acquire()
         sessionid += 1
-        uploaded_data.append((userid, timestamp, filename, device))
-
-        t = threading.Thread(target=process_stereo, args=(sessionid, userid, timestamp, filename))
+        t = threading.Thread(target=process_stereo, args=(sessionid, userid, timestamp, filepath))
         t.start()
         data_lock.release()
 
