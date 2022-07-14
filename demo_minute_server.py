@@ -582,8 +582,13 @@ def upload_onephone():
 @app.route('/check_session_complete', methods=['POST'])
 def check_session_complete():
     if request.method == 'POST':
-        params = request.get_json()
-        sessionid = int(params['sessionid'])
+        if 'sessionid' in request.form:
+            sessionid = request.form['sessionid']
+            print(f'check_session_complete: sessionid = {userid}', file=sys.stderr)
+        else:
+            print('no user id in POST data', file=sys.stderr)
+            flash('no user id in POST data')
+            return redirect(request.url)
 
         global processingid
         if processingid != 0:
