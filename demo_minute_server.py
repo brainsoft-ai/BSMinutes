@@ -375,7 +375,7 @@ def process_stereo(sessionid, userid, timestamp, filepath):
 
     # sync and mix audio files
     #wav1, wav2, sr = sync_audio2(filepath_out1, filepath_out2)
-    wav = mix_mono2stereo(wav1, 1.0, 0.0, wav2, 0.0, 1.0)
+    #wav = mix_mono2stereo(wav1, 1.0, 0.0, wav2, 0.0, 1.0)
     mix_path = os.path.join(session_dir, "mix.wav")
     torchaudio.save(mix_path, wav, sr)
 
@@ -529,6 +529,7 @@ def upload_onephone():
         if file != None:
             filename = secure_filename(f"{userid}_{timestamp}_{file.filename}")
             filepath = os.path.join(UPLOAD_FOLDER, filename)
+            print(f'file saved to {filepath}', file=sys.stderr)
             file.save(filepath)
         else:
             print('no file in POST data', file=sys.stderr)
