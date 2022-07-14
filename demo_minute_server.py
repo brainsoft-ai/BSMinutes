@@ -584,7 +584,7 @@ def check_session_complete():
     if request.method == 'POST':
         if 'sessionid' in request.form:
             sessionid = request.form['sessionid']
-            print(f'check_session_complete: sessionid = {userid}', file=sys.stderr)
+            print(f'check_session_complete: sessionid = {sessionid}', file=sys.stderr)
         else:
             print('no user id in POST data', file=sys.stderr)
             flash('no user id in POST data')
