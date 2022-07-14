@@ -250,7 +250,7 @@ def resample_audio(wav, sr1, sr2):
     return wav2, sr2
 
 def get_sessiondir(sessionid):
-    return f"{RESULT_FOLDER}{sessionid:05d}/"
+    return f"{RESULT_FOLDER}{int(sessionid):05d}/"
 
 def zip_session_content(sessionid):
     session_dir = get_sessiondir(sessionid)
