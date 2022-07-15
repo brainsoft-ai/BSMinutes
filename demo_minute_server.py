@@ -491,6 +491,7 @@ def show_result():
         session_dir = get_sessiondir(sessionid)
         result_file = f"{session_dir}{RESULT_FILE}"
         try:
+            print(f"show_result: result file = {result_file}", file=sys.stderr)
             return send_file(
                 result_file,
                 as_attachment=True
