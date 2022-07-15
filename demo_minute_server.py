@@ -370,8 +370,8 @@ def process_stereo(sessionid, userid, timestamp, filepath):
     wav, sr = resample_audio(wav, sr, SAMPLE_RATE)
     ch = len(wav)
 
-    user1 = userid+"_L"
-    user2 = userid+"_R"
+    user1 = userid+"_1"
+    user2 = userid+"_2"
 
     # sync and mix audio files
     #wav1, wav2, sr = sync_audio2(filepath_out1, filepath_out2)
@@ -540,18 +540,6 @@ def upload_onephone():
             print('no file in POST data', file=sys.stderr)
             flash('no file in POST data')
             return redirect(request.url)
-
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-
-        if file and allowed_file(file.filename):
-            filename = secure_filename(f"{userid}_{timestamp}.webm")
-            file.save(f"{UPLOAD_FOLDER}{filename}")
-        else:
-            flash('file type not supported')
 
         global data_lock
         global sessionid
