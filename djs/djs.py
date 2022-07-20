@@ -193,10 +193,60 @@ class DJS():
     def getSpectrograms(self):
         return self.get_sin_spectrogram(), self.get_cos_spectrogram(), self.get_amplitude_spectrogram(), self.get_phase_spectrogram()
 
-    def get_time_length(self):
+    def get_sin_spectrogram_for_time_period(self, stime, etime, fslice=slice(None, None)): #stime/etime: start and end time in miliseconds
+        t_stride = self._config.stride * 1000 // self._config.sr
+        s = stime * t_stride
+        e = etime * t_stride
+        if s < 0:
+            s = 0
+        if e > self._config.length:
+            e = self._config.length
+
+        tslice = slice(s, e)
+        return self.get_sin_spectrogram(fslice=fslice, tslice=tslice)
+
+    def get_cos_spectrogram_for_time_period(self, stime, etime, fslice=slice(None, None)): #stime/etime: start and end time in miliseconds
+        t_stride = self._config.stride * 1000 // self._config.sr
+        s = stime * t_stride
+        e = etime * t_stride
+        if s < 0:
+            s = 0
+        if e > self._config.length:
+            e = self._config.length
+
+        tslice = slice(s, e)
+        return self.get_cos_spectrogram(fslice=fslice, tslice=tslice)
+
+    def get_amplitude_spectrogram_for_time_period(self, stime, etime, fslice=slice(None, None)): #stime/etime: start and end time in miliseconds
+        t_stride = self._config.stride * 1000 // self._config.sr
+        s = stime * t_stride
+        e = etime * t_stride
+        if s < 0:
+            s = 0
+        if e > self._config.length:
+            e = self._config.length
+
+        tslice = slice(s, e)
+        return self.get_amplitude_spectrogram(fslice=fslice, tslice=tslice)
+
+    def get_phase_spectrogram_for_time_period(self, stime, etime, fslice=slice(None, None)): #stime/etime: start and end time in miliseconds
+        t_stride = self._config.stride * 1000 // self._config.sr
+        s = stime * t_stride
+        e = etime * t_stride
+        if s < 0:
+            s = 0
+        if e > self._config.length:
+            e = self._config.length
+
+        tslice = slice(s, e)
+        return self.get_phase_spectrogram(fslice=fslice, tslice=tslice)
+
+    @property
+    def time_length(self):
         return self._config.length
 
-    def get_freq_length(self):
+    @property
+    def freq_length(self):
         return self._config.num_freqs
 
 def loadDJS(djs_path):

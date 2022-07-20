@@ -18,7 +18,7 @@ from djs.djt import DJT
 from syncstart import file_offset
 
 from clovaspeechclient import ClovaSpeechClient
-from fix_word_overlap import remove_residual_words
+from fix_word_overlap import remove_residual_words, remove_residual_texts
 
 RESULT_FOLDER = './results/'
 RESULT_FILE = 'result.zip'
@@ -340,7 +340,7 @@ def process_data(sessionid):
     stt_result = {}
     stt_segments1 = get_stt_segments(new_path1)
     stt_segments2 = get_stt_segments(new_path2)
-    stt_result[user1], stt_result[user2] = remove_residual_words(stt_segments1, djs1, stt_segments2, djs2)
+    stt_result[user1], stt_result[user2] = remove_residual_texts(stt_segments1, djs1, stt_segments2, djs2)
 
     stt_result_path = f"{session_dir}stt_result.json"
     with open(stt_result_path, 'w') as outfile:
@@ -397,7 +397,7 @@ def process_stereo(sessionid, userid, timestamp, filepath):
     stt_result = {}
     stt_segments1 = get_stt_segments(new_path1)
     stt_segments2 = get_stt_segments(new_path2)
-    stt_result[user1], stt_result[user2] = remove_residual_words(stt_segments1, djs1, stt_segments2, djs2)
+    stt_result[user1], stt_result[user2] = remove_residual_texts(stt_segments1, djs1, stt_segments2, djs2)
 
     stt_result_path = f"{session_dir}stt_result.json"
     with open(stt_result_path, 'w') as outfile:

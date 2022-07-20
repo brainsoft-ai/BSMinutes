@@ -86,7 +86,7 @@ class DJT():
             print('wrong number of channel : ', self._djt_config.channel)
             raise ValueError
 
-        self._djt_config.length = spectrogram.get_time_length()
+        self._djt_config.length = spectrogram.time_length
 
         self._prev_tail = wav_data[-self._djt_config.kernel_size+1:, ...]
 
