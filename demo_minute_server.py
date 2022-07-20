@@ -619,4 +619,4 @@ if __name__ == "__main__":
 
     app.config["SESSION_TYPE"] = "filesystem"
     app.config["SECRET_KEY"] = "super sekret key"
-    app.run(host="0.0.0.0", port=443, debug=True, threaded=True, ssl_context=ssl_context)
+    app.run(host="0.0.0.0", port=333, debug=True, threaded=True, ssl_context=ssl_context)
